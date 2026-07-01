@@ -49,10 +49,18 @@ async function syncDynamicRules(extraRules = []) {
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
 }
 
-// Rebuilds everything including custom lists (used on install, options edits, and the list alarm).
+async function buildUserRules() {
+  const s = await getSettings();
+  if (!s.userRules || !s.userRules.trim()) return [];
+  const { rules } = convertList(s.userRules, RESERVED.USER_START);
+  return rules.map((r, i) => ({ ...r, id: RESERVED.USER_START + i, priority: Math.max(r.priority || 1, 50) }));
+}
+
+// Rebuilds everything including custom lists and user rules (used on install,
+// options edits, and the list alarm).
 async function fullSync() {
-  const custom = await buildCustomRules();
-  await syncDynamicRules(custom);
+  const [custom, user] = await Promise.all([buildCustomRules(), buildUserRules()]);
+  await syncDynamicRules(custom.concat(user));
 }
 
 async function toggleSite(host) {
@@ -112,6 +120,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse(await getStats(msg.tabId));
     } else if (msg.type === MSG.GET_STATS_DETAIL) {
       sendResponse(await getStatsDetail());
+    } else if (msg.type === MSG.GET_RULE_LIMITS) {
+      const dnr = chrome.declarativeNetRequest;
+      const [enabled, dynamic] = await Promise.all([
+        dnr.getEnabledRulesets(),
+        dnr.getDynamicRules(),
+      ]);
+      const availableStatic = await dnr.getAvailableStaticRuleCount();
+      sendResponse({
+        enabledRulesets: enabled,
+        availableStatic,
+        dynamicCount: dynamic.length,
+        dynamicMax: dnr.MAX_NUMBER_OF_DYNAMIC_RULES || 30000,
+        staticRulesetsMax: dnr.MAX_NUMBER_OF_ENABLED_STATIC_RULESETS || 50,
+      });
     } else if (msg.type === MSG.GET_SELECTORS) {
       const s = await getSettings();
       const host = msg.host || "";

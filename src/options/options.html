@@ -11,6 +11,8 @@
       <button class="navitem" data-sec="blocked">Blocked sites</button>
       <button class="navitem" data-sec="schedule">Schedule</button>
       <button class="navitem" data-sec="custom">Custom lists</button>
+      <button class="navitem" data-sec="userrules">User rules</button>
+      <button class="navitem" data-sec="rulelimits">Rule limits</button>
       <button class="navitem" data-sec="about">About</button>
     </nav>
   </aside>
@@ -64,6 +66,19 @@
       <ul id="listUrls" class="list"></ul>
       <h2>Picked elements</h2>
       <button id="clearPicked" class="danger">Clear all picked elements</button>
+    </section>
+
+    <section class="sec hidden" data-sec="userrules">
+      <h1>User rules</h1>
+      <p class="lead">Add your own filter rules, one per line. Use Adblock Plus syntax, for example <code>||ads.example.com^</code> or <code>example.com##.banner</code>.</p>
+      <textarea id="userRules" class="editor" spellcheck="false" placeholder="||ads.example.com^&#10;example.com##.sponsored"></textarea>
+      <div class="editor-actions"><button id="userRulesSave">Save rules</button><span id="userRulesStatus" class="muted"></span></div>
+    </section>
+
+    <section class="sec hidden" data-sec="rulelimits">
+      <h1>Rule limits</h1>
+      <p class="lead">Chrome limits how many blocking rules an extension can apply. Here is Bulwark's current usage.</p>
+      <div id="limits"></div>
     </section>
 
     <section class="sec hidden" data-sec="about">

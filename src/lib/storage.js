@@ -4,6 +4,7 @@ export const DEFAULTS = {
   blocklist: [],
   schedule: { enabled: false, days: [1, 2, 3, 4, 5], start: "09:00", end: "17:00" },
   customListUrls: [],
+  userRules: "",
   pickedSelectors: {},
   rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true },
 };

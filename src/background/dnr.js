@@ -1,4 +1,4 @@
-export const RESERVED = { ALLOW_START: 1000000, BLOCK_START: 2000000, CUSTOM_START: 3000000 };
+export const RESERVED = { ALLOW_START: 1000000, BLOCK_START: 2000000, CUSTOM_START: 3000000, USER_START: 3500000 };
 
 export function allowlistRules(allowlist) {
   return allowlist.map((host, i) => ({
