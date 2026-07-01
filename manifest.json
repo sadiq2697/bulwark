@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bulwark",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Block ads, trackers, and distracting sites.",
   "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "storage", "scripting", "tabs", "alarms", "webNavigation", "contextMenus", "privacy"],
   "host_permissions": ["<all_urls>"],
