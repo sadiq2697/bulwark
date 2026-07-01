@@ -4,8 +4,12 @@ export const DEFAULTS = {
   blocklist: [],
   schedule: { enabled: false, days: [1, 2, 3, 4, 5], start: "09:00", end: "17:00" },
   customListUrls: [],
+  userRules: "",
   pickedSelectors: {},
   rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true },
+  tracking: { webrtc: false, gpc: false, xclientdata: false },
+  ui: { badge: true, contextMenu: true, theme: "system" },
+  invertAllowlist: false,
 };
 
 export async function getSettings() {
@@ -15,6 +19,8 @@ export async function getSettings() {
     ...stored,
     schedule: { ...DEFAULTS.schedule, ...(stored.schedule || {}) },
     rulesets: { ...DEFAULTS.rulesets, ...(stored.rulesets || {}) },
+    tracking: { ...DEFAULTS.tracking, ...(stored.tracking || {}) },
+    ui: { ...DEFAULTS.ui, ...(stored.ui || {}) },
     pickedSelectors: stored.pickedSelectors || {},
   };
 }
