@@ -42,11 +42,18 @@ export function allowlistRules(allowlist) {
   }));
 }
 
+function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
 export function blocklistRules(blocklist, blockPageUrl) {
+  // Redirect main-frame navigations to the block page, carrying the original URL
+  // in the hash so the page can offer "go back" and "proceed anyway".
   return blocklist.map((host, i) => ({
     id: RESERVED.BLOCK_START + i,
     priority: 2000,
-    action: { type: "redirect", redirect: { url: blockPageUrl } },
-    condition: { requestDomains: [host], resourceTypes: ["main_frame"] },
+    action: { type: "redirect", redirect: { regexSubstitution: `${blockPageUrl}#url=\\0` } },
+    condition: {
+      regexFilter: `^https?://([a-z0-9-]+\\.)*${reEscape(host)}(?::\\d+)?(?:[/?#].*)?$`,
+      resourceTypes: ["main_frame"],
+    },
   }));
 }

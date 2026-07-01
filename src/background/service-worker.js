@@ -135,9 +135,25 @@ if (chrome.contextMenus) {
 chrome.webNavigation.onErrorOccurred.addListener((d) => {
   if (d.frameId !== 0) return;
   if (typeof d.error === "string" && d.error.includes("BLOCKED_BY_CLIENT")) {
-    chrome.tabs.update(d.tabId, { url: chrome.runtime.getURL("pages/blocked.html") }).catch(() => {});
+    const target = chrome.runtime.getURL("pages/blocked.html") + "#url=" + encodeURIComponent(d.url || "");
+    chrome.tabs.update(d.tabId, { url: target }).catch(() => {});
   }
 });
+
+// Temporary "proceed anyway": add a session allow rule so the host loads until
+// the browser restarts, without touching the saved allowlist.
+async function bypassSite(host) {
+  if (!host) return;
+  const id = 900000 + (Math.abs(hashCode(host)) % 90000);
+  await chrome.declarativeNetRequest.updateSessionRules({
+    removeRuleIds: [id],
+    addRules: [{
+      id, priority: 5000, action: { type: "allowAllRequests" },
+      condition: { requestDomains: [host], resourceTypes: ["main_frame", "sub_frame"] },
+    }],
+  });
+}
+function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
@@ -155,6 +171,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === MSG.TOGGLE_SITE) {
       const allowed = await toggleSite(msg.host);
       sendResponse({ siteAllowed: allowed });
+    } else if (msg.type === MSG.BYPASS_SITE) {
+      await bypassSite(msg.host);
+      sendResponse({ ok: true });
     } else if (msg.type === MSG.GET_STATS) {
       sendResponse(await getStats(msg.tabId));
     } else if (msg.type === MSG.GET_STATS_DETAIL) {
