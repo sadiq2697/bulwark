@@ -39,6 +39,15 @@ function showSection(sec) {
   document.querySelectorAll(".navitem").forEach((n) => n.classList.toggle("active", n.dataset.sec === sec));
   document.querySelectorAll(".sec").forEach((s) => s.classList.toggle("hidden", s.dataset.sec !== sec));
   if (sec === "rulelimits") renderLimits();
+  if (sec === "filters") renderListInfo();
+}
+
+async function renderListInfo() {
+  const info = await chrome.runtime.sendMessage({ type: MSG.GET_LIST_INFO });
+  if (!info) return;
+  const when = info.updatedAt ? new Date(info.updatedAt).toLocaleString() : "not yet";
+  $("listInfo").textContent =
+    `Last checked: ${when}. Custom lists (${info.customCount}) update automatically. Built-in lists refresh when Bulwark is updated.`;
 }
 
 async function renderLimits() {
@@ -177,6 +186,12 @@ function wire() {
     });
   }
 
+  $("updateLists").addEventListener("click", async () => {
+    $("updateLists").textContent = "Updating...";
+    await chrome.runtime.sendMessage({ type: MSG.UPDATE_LISTS });
+    await renderListInfo();
+    $("updateLists").textContent = "Update now";
+  });
   $("exportSettings").addEventListener("click", async () => {
     const s = await getSettings();
     download("bulwark-settings.json", JSON.stringify(s, null, 2));

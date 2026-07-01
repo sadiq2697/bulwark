@@ -105,6 +105,7 @@ async function fullSync() {
   const [custom, user] = await Promise.all([buildCustomRules(), buildUserRules()]);
   await syncDynamicRules(custom.concat(user));
   await applySideSettings();
+  await setLocal("listsUpdatedAt", Date.now());
 }
 
 async function toggleSite(host) {
@@ -196,6 +197,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse(await getStatsDetail(msg.days || 7));
     } else if (msg.type === MSG.GET_LOG) {
       sendResponse({ entries: getLog() });
+    } else if (msg.type === MSG.UPDATE_LISTS) {
+      await fullSync();
+      sendResponse({ updatedAt: await getLocal("listsUpdatedAt", 0) });
+    } else if (msg.type === MSG.GET_LIST_INFO) {
+      const s = await getSettings();
+      sendResponse({ updatedAt: await getLocal("listsUpdatedAt", 0), customCount: s.customListUrls.length });
     } else if (msg.type === MSG.GET_RULE_LIMITS) {
       const dnr = chrome.declarativeNetRequest;
       const [enabled, dynamic] = await Promise.all([
