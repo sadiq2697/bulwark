@@ -30,6 +30,8 @@ export function convertNetworkRule(line, id) {
     body = body.slice(0, dollar);
   }
   if (!body) return { skipped: raw };
+  // DNR urlFilter must be ASCII; skip non-ASCII patterns so Chrome does not reject the ruleset.
+  if (/[^\x00-\x7F]/.test(body)) return { skipped: raw };
 
   const resourceTypes = [];
   const excludedTypes = [];

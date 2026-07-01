@@ -30,6 +30,10 @@ test("regex rules are skipped", () => {
   assert.deepEqual(convertNetworkRule("/banner\\d+/", 8), { skipped: "/banner\\d+/" });
 });
 
+test("non-ASCII patterns are skipped", () => {
+  assert.deepEqual(convertNetworkRule("||exämple.net^", 9), { skipped: "||exämple.net^" });
+});
+
 test("cosmetic hide rule", () => {
   assert.deepEqual(extractCosmetic("example.com##.ad-banner"), { selector: ".ad-banner", domains: ["example.com"] });
   assert.deepEqual(extractCosmetic("##.generic-ad"), { selector: ".generic-ad", domains: [] });
