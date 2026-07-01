@@ -7,10 +7,14 @@
     <nav id="nav">
       <button class="navitem active" data-sec="general">General</button>
       <button class="navitem" data-sec="filters">Filters</button>
+      <button class="navitem" data-sec="tracking">Tracking protection</button>
       <button class="navitem" data-sec="allowlist">Allowlist</button>
       <button class="navitem" data-sec="blocked">Blocked sites</button>
       <button class="navitem" data-sec="schedule">Schedule</button>
       <button class="navitem" data-sec="custom">Custom lists</button>
+      <button class="navitem" data-sec="userrules">User rules</button>
+      <button class="navitem" data-sec="rulelimits">Rule limits</button>
+      <button class="navitem" data-sec="additional">Additional settings</button>
       <button class="navitem" data-sec="about">About</button>
     </nav>
   </aside>
@@ -34,6 +38,16 @@
         <label class="switch"><input type="checkbox" data-ruleset="cosmeticAds"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Dismiss cookie banners</div><div class="fdesc">Fanboy's Cookiemonster</div></div>
         <label class="switch"><input type="checkbox" data-ruleset="cookies"><span class="slider"></span></label></div>
+    </section>
+
+    <section class="sec hidden" data-sec="tracking">
+      <h1>Tracking protection</h1>
+      <div class="field"><div><div class="ftitle">Prevent WebRTC IP leaks</div><div class="fdesc">Stops sites from discovering your local IP address.</div></div>
+        <label class="switch"><input type="checkbox" data-track="webrtc"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Send Global Privacy Control</div><div class="fdesc">Adds a Sec-GPC signal asking sites not to sell your data.</div></div>
+        <label class="switch"><input type="checkbox" data-track="gpc"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Remove X-Client-Data header</div><div class="fdesc">Stops Chrome sending its identifier to Google sites.</div></div>
+        <label class="switch"><input type="checkbox" data-track="xclientdata"><span class="slider"></span></label></div>
     </section>
 
     <section class="sec hidden" data-sec="allowlist">
@@ -64,6 +78,29 @@
       <ul id="listUrls" class="list"></ul>
       <h2>Picked elements</h2>
       <button id="clearPicked" class="danger">Clear all picked elements</button>
+    </section>
+
+    <section class="sec hidden" data-sec="userrules">
+      <h1>User rules</h1>
+      <p class="lead">Add your own filter rules, one per line. Use Adblock Plus syntax, for example <code>||ads.example.com^</code> or <code>example.com##.banner</code>.</p>
+      <textarea id="userRules" class="editor" spellcheck="false" placeholder="||ads.example.com^&#10;example.com##.sponsored"></textarea>
+      <div class="editor-actions"><button id="userRulesSave">Save rules</button><span id="userRulesStatus" class="muted"></span></div>
+    </section>
+
+    <section class="sec hidden" data-sec="rulelimits">
+      <h1>Rule limits</h1>
+      <p class="lead">Chrome limits how many blocking rules an extension can apply. Here is Bulwark's current usage.</p>
+      <div id="limits"></div>
+    </section>
+
+    <section class="sec hidden" data-sec="additional">
+      <h1>Additional settings</h1>
+      <div class="field"><div><div class="ftitle">Show blocked count on the icon</div><div class="fdesc">Badge with the number blocked on the current page.</div></div>
+        <label class="switch"><input type="checkbox" data-ui="badge"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Right-click menu</div><div class="fdesc">Add "Hide an element" and "Toggle blocking" to the page menu.</div></div>
+        <label class="switch"><input type="checkbox" data-ui="contextMenu"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Invert allowlist</div><div class="fdesc">Block only on the sites in your allowlist, and allow everywhere else.</div></div>
+        <label class="switch"><input type="checkbox" id="invertAllowlist"><span class="slider"></span></label></div>
     </section>
 
     <section class="sec hidden" data-sec="about">

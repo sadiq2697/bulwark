@@ -1,7 +1,7 @@
 import { getSettings, setSettings, getLocal, setLocal } from "../lib/storage.js";
-import { allowlistRules, blocklistRules, RESERVED } from "./dnr.js";
+import { allowlistRules, blocklistRules, trackingRules, RESERVED } from "./dnr.js";
 import { isWithinWindow } from "./schedule.js";
-import { initCounters, getStats, getStatsDetail } from "./counters.js";
+import { initCounters, getStats, getStatsDetail, setBadgeEnabled } from "./counters.js";
 import { convertList } from "../lib/filter-converter.js";
 import { MSG } from "../lib/messages.js";
 
@@ -35,9 +35,16 @@ async function syncDynamicRules(extraRules = []) {
   const removeRuleIds = existing.map((r) => r.id);
   let addRules = [];
   if (s.enabled) {
-    addRules = addRules.concat(allowlistRules(s.allowlist));
+    if (s.invertAllowlist) {
+      const cond = { resourceTypes: ["main_frame", "sub_frame"] };
+      if (s.allowlist.length) cond.excludedRequestDomains = s.allowlist;
+      addRules.push({ id: RESERVED.ALLOW_START, priority: 1000, action: { type: "allowAllRequests" }, condition: cond });
+    } else {
+      addRules = addRules.concat(allowlistRules(s.allowlist));
+    }
     const scheduleActive = s.schedule.enabled ? isWithinWindow(s.schedule) : true;
     if (scheduleActive) addRules = addRules.concat(blocklistRules(s.blocklist, BLOCK_PAGE));
+    addRules = addRules.concat(trackingRules(s.tracking));
     addRules = addRules.concat(extraRules);
     await chrome.declarativeNetRequest.updateEnabledRulesets({
       enableRulesetIds: [...(s.rulesets.ads ? ["ads"] : []), ...(s.rulesets.privacy ? ["privacy"] : [])],
@@ -49,10 +56,38 @@ async function syncDynamicRules(extraRules = []) {
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
 }
 
-// Rebuilds everything including custom lists (used on install, options edits, and the list alarm).
+async function buildUserRules() {
+  const s = await getSettings();
+  if (!s.userRules || !s.userRules.trim()) return [];
+  const { rules } = convertList(s.userRules, RESERVED.USER_START);
+  return rules.map((r, i) => ({ ...r, id: RESERVED.USER_START + i, priority: Math.max(r.priority || 1, 50) }));
+}
+
+async function setupContextMenu(s) {
+  if (!chrome.contextMenus) return;
+  await chrome.contextMenus.removeAll();
+  if (!s.ui.contextMenu) return;
+  chrome.contextMenus.create({ id: "bulwark-pick", title: "Hide an element", contexts: ["page"] });
+  chrome.contextMenus.create({ id: "bulwark-allow", title: "Toggle blocking on this site", contexts: ["page"] });
+}
+
+// Applies settings that are not DNR rules: badge visibility, WebRTC policy, context menu.
+async function applySideSettings() {
+  const s = await getSettings();
+  setBadgeEnabled(s.ui.badge);
+  try {
+    const p = chrome.privacy && chrome.privacy.network && chrome.privacy.network.webRTCIPHandlingPolicy;
+    if (p) p.set({ value: s.tracking.webrtc ? "default_public_interface_only" : "default" });
+  } catch { /* privacy API may be unavailable */ }
+  await setupContextMenu(s);
+}
+
+// Rebuilds everything including custom lists and user rules (used on install,
+// options edits, and the list alarm).
 async function fullSync() {
-  const custom = await buildCustomRules();
-  await syncDynamicRules(custom);
+  const [custom, user] = await Promise.all([buildCustomRules(), buildUserRules()]);
+  await syncDynamicRules(custom.concat(user));
+  await applySideSettings();
 }
 
 async function toggleSite(host) {
@@ -81,6 +116,17 @@ chrome.commands.onCommand.addListener(async (cmd) => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab?.url) await toggleSite(hostOf(tab.url));
 });
+
+if (chrome.contextMenus) {
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (!tab) return;
+    if (info.menuItemId === "bulwark-pick") {
+      chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["src/content/picker.js"] }).catch(() => {});
+    } else if (info.menuItemId === "bulwark-allow" && tab.url) {
+      await toggleSite(hostOf(tab.url));
+    }
+  });
+}
 
 // When a top-frame navigation to an ad domain is blocked, Chrome shows a bare
 // ERR_BLOCKED_BY_CLIENT page. Replace it with our own blocked page. Sub-resource
@@ -112,6 +158,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse(await getStats(msg.tabId));
     } else if (msg.type === MSG.GET_STATS_DETAIL) {
       sendResponse(await getStatsDetail());
+    } else if (msg.type === MSG.GET_RULE_LIMITS) {
+      const dnr = chrome.declarativeNetRequest;
+      const [enabled, dynamic] = await Promise.all([
+        dnr.getEnabledRulesets(),
+        dnr.getDynamicRules(),
+      ]);
+      const availableStatic = await dnr.getAvailableStaticRuleCount();
+      sendResponse({
+        enabledRulesets: enabled,
+        availableStatic,
+        dynamicCount: dynamic.length,
+        dynamicMax: dnr.MAX_NUMBER_OF_DYNAMIC_RULES || 30000,
+        staticRulesetsMax: dnr.MAX_NUMBER_OF_ENABLED_STATIC_RULESETS || 50,
+      });
     } else if (msg.type === MSG.GET_SELECTORS) {
       const s = await getSettings();
       const host = msg.host || "";
