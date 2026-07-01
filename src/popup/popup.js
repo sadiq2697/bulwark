@@ -1,4 +1,5 @@
 import { MSG } from "../lib/messages.js";
+import { initTheme } from "../lib/theme.js";
 
 const $ = (id) => document.getElementById(id);
 function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
@@ -97,6 +98,7 @@ async function init() {
   $("siteLabel").textContent = host || "This site";
 
   const state = await chrome.runtime.sendMessage({ type: MSG.GET_STATE, host });
+  initTheme(state.theme || "system");
   renderStatus(state.enabled, state.siteAllowed);
 
   const stats = await chrome.runtime.sendMessage({ type: MSG.GET_STATS, tabId: tab.id });

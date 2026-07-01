@@ -1,6 +1,9 @@
 import { getSettings, setSettings } from "../lib/storage.js";
 import { confirmModal, dropdown } from "../ui/components.js";
+import { applyTheme } from "../lib/theme.js";
 import { MSG } from "../lib/messages.js";
+
+const THEME_LABEL = { system: "System", light: "Light", dark: "Dark" };
 
 const $ = (id) => document.getElementById(id);
 const times = Array.from({ length: 48 }, (_, i) => {
@@ -95,6 +98,8 @@ async function render() {
   document.querySelectorAll("[data-ui]").forEach((cb) => { cb.checked = !!s.ui[cb.dataset.ui]; });
   $("invertAllowlist").checked = !!s.invertAllowlist;
   $("userRules").value = s.userRules || "";
+  $("themeBtn").textContent = THEME_LABEL[s.ui.theme] || "System";
+  applyTheme(s.ui.theme);
   $("ver").textContent = "v" + chrome.runtime.getManifest().version;
 }
 
@@ -147,6 +152,24 @@ function wire() {
   });
   pickTime("start", $("startBtn"), "Start");
   pickTime("end", $("endBtn"), "End");
+
+  $("themeBtn").addEventListener("click", () => {
+    dropdown($("themeBtn"), [
+      { label: "System", value: "system" },
+      { label: "Light", value: "light" },
+      { label: "Dark", value: "dark" },
+    ], async (val) => {
+      const s = await getSettings();
+      await setSettings({ ui: { ...s.ui, theme: val } });
+      $("themeBtn").textContent = THEME_LABEL[val];
+      applyTheme(val);
+    });
+  });
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", async () => {
+      const s = await getSettings(); applyTheme(s.ui.theme);
+    });
+  }
 
   $("exportSettings").addEventListener("click", async () => {
     const s = await getSettings();

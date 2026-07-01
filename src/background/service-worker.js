@@ -160,7 +160,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === MSG.GET_STATE) {
       const s = await getSettings();
       const host = msg.host || "";
-      sendResponse({ enabled: s.enabled, siteAllowed: s.allowlist.includes(host), host });
+      sendResponse({ enabled: s.enabled, siteAllowed: s.allowlist.includes(host), host, theme: s.ui.theme });
     } else if (msg.type === MSG.SETTINGS_CHANGED) {
       await fullSync();
       sendResponse({ ok: true });
