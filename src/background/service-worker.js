@@ -7,6 +7,7 @@ import { MSG } from "../lib/messages.js";
 
 const BLOCK_PAGE = chrome.runtime.getURL("pages/blocked.html");
 const MAX_CUSTOM = 20000;
+const NETWORK_RULESETS = ["ads", "privacy", "social", "annoyances", "security"];
 
 function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
 
@@ -47,11 +48,11 @@ async function syncDynamicRules(extraRules = []) {
     addRules = addRules.concat(trackingRules(s.tracking));
     addRules = addRules.concat(extraRules);
     await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds: [...(s.rulesets.ads ? ["ads"] : []), ...(s.rulesets.privacy ? ["privacy"] : [])],
-      disableRulesetIds: [...(!s.rulesets.ads ? ["ads"] : []), ...(!s.rulesets.privacy ? ["privacy"] : [])],
+      enableRulesetIds: NETWORK_RULESETS.filter((id) => s.rulesets[id]),
+      disableRulesetIds: NETWORK_RULESETS.filter((id) => !s.rulesets[id]),
     });
   } else {
-    await chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: ["ads", "privacy"] });
+    await chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: NETWORK_RULESETS });
   }
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
 }
@@ -180,6 +181,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         disabled: s.allowlist.includes(host) || !s.enabled,
         cosmeticAds: s.rulesets.cosmeticAds,
         cookies: s.rulesets.cookies,
+        social: s.rulesets.social,
+        annoyances: s.rulesets.annoyances,
       });
     } else if (msg.type === MSG.ADD_SELECTOR) {
       const s = await getSettings();

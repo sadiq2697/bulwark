@@ -6,7 +6,7 @@ export const DEFAULTS = {
   customListUrls: [],
   userRules: "",
   pickedSelectors: {},
-  rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true },
+  rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true, social: false, annoyances: false, security: false },
   tracking: { webrtc: false, gpc: false, xclientdata: false },
   ui: { badge: true, contextMenu: true, theme: "system" },
   invertAllowlist: false,
