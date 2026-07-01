@@ -10,9 +10,13 @@ async function activeTab() {
 
 function renderStatus(enabled, siteAllowed) {
   const protectedHere = enabled && !siteAllowed;
-  $("siteToggle").checked = protectedHere;
-  document.querySelector(".status").classList.toggle("off", !protectedHere);
-  $("statusText").textContent = !enabled
+  const toggle = $("siteToggle");
+  const status = document.querySelector(".status");
+  const text = $("statusText");
+  if (!toggle || !status || !text) return; // tolerate a stale/partial load
+  toggle.checked = protectedHere;
+  status.classList.toggle("off", !protectedHere);
+  text.textContent = !enabled
     ? "Paused everywhere"
     : (siteAllowed ? "Paused on this site" : "Protection on");
 }
@@ -105,4 +109,4 @@ async function init() {
     $("panel-stats").classList.toggle("hidden", t.dataset.tab !== "stats");
   }));
 }
-init();
+init().catch((e) => console.warn("Bulwark popup init failed", e));

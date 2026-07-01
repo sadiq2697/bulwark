@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect x="0" y="0" width="128" height="128" rx="28" fill="#141a26"/>
-  <rect x="0" y="64" width="128" height="64" rx="28" fill="#0f141d" opacity="0.55"/>
-  <!-- shield -->
+  <!-- shield (transparent background, no box) -->
   <path d="M64 18 L101 31 V63 C101 88 85 103 64 111 C43 103 27 88 27 63 V31 Z"
         fill="#d0392b" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>
   <!-- bull -->
