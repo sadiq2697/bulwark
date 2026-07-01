@@ -6,6 +6,7 @@
     <div class="brand"><img src="../../icons/icon48.png" alt="" width="24" height="24"><span>Bulwark</span></div>
     <nav id="nav">
       <button class="navitem active" data-sec="general">General</button>
+      <button class="navitem" data-sec="dashboard">Dashboard</button>
       <button class="navitem" data-sec="filters">Filters</button>
       <button class="navitem" data-sec="tracking">Tracking protection</button>
       <button class="navitem" data-sec="allowlist">Allowlist</button>
@@ -30,6 +31,17 @@
       <div class="field"><div><div class="ftitle">Settings backup</div><div class="fdesc">Save all your settings to a file, or restore them.</div></div>
         <div class="btn-row"><button id="exportSettings" class="ghost">Export</button><button id="importSettings" class="ghost">Import</button></div></div>
       <input type="file" id="importFile" accept="application/json" hidden>
+    </section>
+
+    <section class="sec hidden" data-sec="dashboard">
+      <h1>Dashboard</h1>
+      <div class="stat-grid">
+        <div class="stat"><b id="dbTotal">0</b><small>requests blocked</small></div>
+        <div class="stat"><b id="dbData">0</b><small>data saved (estimate)</small></div>
+        <div class="stat"><b id="dbTime">0</b><small>time saved (estimate)</small></div>
+      </div>
+      <h2>Top blocked domains (this session)</h2>
+      <ul id="topDomains" class="list"></ul>
     </section>
 
     <section class="sec hidden" data-sec="filters">
