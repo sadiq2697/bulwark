@@ -1,6 +1,9 @@
 import { getSettings, setSettings } from "../lib/storage.js";
 import { confirmModal, dropdown } from "../ui/components.js";
+import { applyTheme } from "../lib/theme.js";
 import { MSG } from "../lib/messages.js";
+
+const THEME_LABEL = { system: "System", light: "Light", dark: "Dark" };
 
 const $ = (id) => document.getElementById(id);
 const times = Array.from({ length: 48 }, (_, i) => {
@@ -10,6 +13,27 @@ const times = Array.from({ length: 48 }, (_, i) => {
 });
 
 async function resync() { try { await chrome.runtime.sendMessage({ type: MSG.SETTINGS_CHANGED }); } catch {} }
+
+function download(name, text, type = "application/json") {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function pickFile(input) {
+  return new Promise((resolve) => {
+    input.onchange = () => {
+      const f = input.files[0]; input.value = "";
+      if (!f) return resolve(null);
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.readAsText(f);
+    };
+    input.click();
+  });
+}
 
 function showSection(sec) {
   document.querySelectorAll(".navitem").forEach((n) => n.classList.toggle("active", n.dataset.sec === sec));
@@ -74,6 +98,8 @@ async function render() {
   document.querySelectorAll("[data-ui]").forEach((cb) => { cb.checked = !!s.ui[cb.dataset.ui]; });
   $("invertAllowlist").checked = !!s.invertAllowlist;
   $("userRules").value = s.userRules || "";
+  $("themeBtn").textContent = THEME_LABEL[s.ui.theme] || "System";
+  applyTheme(s.ui.theme);
   $("ver").textContent = "v" + chrome.runtime.getManifest().version;
 }
 
@@ -126,6 +152,49 @@ function wire() {
   });
   pickTime("start", $("startBtn"), "Start");
   pickTime("end", $("endBtn"), "End");
+
+  $("themeBtn").addEventListener("click", () => {
+    dropdown($("themeBtn"), [
+      { label: "System", value: "system" },
+      { label: "Light", value: "light" },
+      { label: "Dark", value: "dark" },
+    ], async (val) => {
+      const s = await getSettings();
+      await setSettings({ ui: { ...s.ui, theme: val } });
+      $("themeBtn").textContent = THEME_LABEL[val];
+      applyTheme(val);
+    });
+  });
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", async () => {
+      const s = await getSettings(); applyTheme(s.ui.theme);
+    });
+  }
+
+  $("exportSettings").addEventListener("click", async () => {
+    const s = await getSettings();
+    download("bulwark-settings.json", JSON.stringify(s, null, 2));
+  });
+  $("importSettings").addEventListener("click", async () => {
+    const text = await pickFile($("importFile"));
+    if (!text) return;
+    try {
+      const data = JSON.parse(text);
+      if (data && typeof data === "object") { await setSettings(data); await resync(); render(); }
+    } catch { /* invalid file, ignore */ }
+  });
+  $("allowExport").addEventListener("click", async () => {
+    const s = await getSettings();
+    download("bulwark-allowlist.txt", s.allowlist.join("\n"), "text/plain");
+  });
+  $("allowImport").addEventListener("click", async () => {
+    const text = await pickFile($("allowFile"));
+    if (!text) return;
+    const hosts = text.split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+    const s = await getSettings();
+    await setSettings({ allowlist: [...new Set([...s.allowlist, ...hosts])] });
+    await resync(); render();
+  });
 
   $("userRulesSave").addEventListener("click", async () => {
     await setSettings({ userRules: $("userRules").value });

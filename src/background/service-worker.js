@@ -1,12 +1,13 @@
 import { getSettings, setSettings, getLocal, setLocal } from "../lib/storage.js";
 import { allowlistRules, blocklistRules, trackingRules, RESERVED } from "./dnr.js";
 import { isWithinWindow } from "./schedule.js";
-import { initCounters, getStats, getStatsDetail, setBadgeEnabled } from "./counters.js";
+import { initCounters, getStats, getStatsDetail, getLog, setBadgeEnabled } from "./counters.js";
 import { convertList } from "../lib/filter-converter.js";
 import { MSG } from "../lib/messages.js";
 
 const BLOCK_PAGE = chrome.runtime.getURL("pages/blocked.html");
 const MAX_CUSTOM = 20000;
+const NETWORK_RULESETS = ["ads", "privacy", "social", "annoyances", "security"];
 
 function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
 
@@ -47,11 +48,11 @@ async function syncDynamicRules(extraRules = []) {
     addRules = addRules.concat(trackingRules(s.tracking));
     addRules = addRules.concat(extraRules);
     await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds: [...(s.rulesets.ads ? ["ads"] : []), ...(s.rulesets.privacy ? ["privacy"] : [])],
-      disableRulesetIds: [...(!s.rulesets.ads ? ["ads"] : []), ...(!s.rulesets.privacy ? ["privacy"] : [])],
+      enableRulesetIds: NETWORK_RULESETS.filter((id) => s.rulesets[id]),
+      disableRulesetIds: NETWORK_RULESETS.filter((id) => !s.rulesets[id]),
     });
   } else {
-    await chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: ["ads", "privacy"] });
+    await chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: NETWORK_RULESETS });
   }
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
 }
@@ -134,16 +135,32 @@ if (chrome.contextMenus) {
 chrome.webNavigation.onErrorOccurred.addListener((d) => {
   if (d.frameId !== 0) return;
   if (typeof d.error === "string" && d.error.includes("BLOCKED_BY_CLIENT")) {
-    chrome.tabs.update(d.tabId, { url: chrome.runtime.getURL("pages/blocked.html") }).catch(() => {});
+    const target = chrome.runtime.getURL("pages/blocked.html") + "#url=" + encodeURIComponent(d.url || "");
+    chrome.tabs.update(d.tabId, { url: target }).catch(() => {});
   }
 });
+
+// Temporary "proceed anyway": add a session allow rule so the host loads until
+// the browser restarts, without touching the saved allowlist.
+async function bypassSite(host) {
+  if (!host) return;
+  const id = 900000 + (Math.abs(hashCode(host)) % 90000);
+  await chrome.declarativeNetRequest.updateSessionRules({
+    removeRuleIds: [id],
+    addRules: [{
+      id, priority: 5000, action: { type: "allowAllRequests" },
+      condition: { requestDomains: [host], resourceTypes: ["main_frame", "sub_frame"] },
+    }],
+  });
+}
+function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     if (msg.type === MSG.GET_STATE) {
       const s = await getSettings();
       const host = msg.host || "";
-      sendResponse({ enabled: s.enabled, siteAllowed: s.allowlist.includes(host), host });
+      sendResponse({ enabled: s.enabled, siteAllowed: s.allowlist.includes(host), host, theme: s.ui.theme });
     } else if (msg.type === MSG.SETTINGS_CHANGED) {
       await fullSync();
       sendResponse({ ok: true });
@@ -154,10 +171,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === MSG.TOGGLE_SITE) {
       const allowed = await toggleSite(msg.host);
       sendResponse({ siteAllowed: allowed });
+    } else if (msg.type === MSG.BYPASS_SITE) {
+      await bypassSite(msg.host);
+      sendResponse({ ok: true });
     } else if (msg.type === MSG.GET_STATS) {
       sendResponse(await getStats(msg.tabId));
     } else if (msg.type === MSG.GET_STATS_DETAIL) {
-      sendResponse(await getStatsDetail());
+      sendResponse(await getStatsDetail(msg.days || 7));
+    } else if (msg.type === MSG.GET_LOG) {
+      sendResponse({ entries: getLog() });
     } else if (msg.type === MSG.GET_RULE_LIMITS) {
       const dnr = chrome.declarativeNetRequest;
       const [enabled, dynamic] = await Promise.all([
@@ -180,6 +202,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         disabled: s.allowlist.includes(host) || !s.enabled,
         cosmeticAds: s.rulesets.cosmeticAds,
         cookies: s.rulesets.cookies,
+        social: s.rulesets.social,
+        annoyances: s.rulesets.annoyances,
       });
     } else if (msg.type === MSG.ADD_SELECTOR) {
       const s = await getSettings();

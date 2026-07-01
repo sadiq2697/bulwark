@@ -24,21 +24,20 @@
     const state = await chrome.runtime.sendMessage({ type: GET_SELECTORS, host });
     if (!state || state.disabled) return;
 
-    // Only fetch the lists whose toggle is on.
-    const [ads, cookieList] = await Promise.all([
-      state.cosmeticAds ? loadBundled("cosmetic-ads.json") : Promise.resolve([]),
-      state.cookies ? loadBundled("cosmetic-cookies.json") : Promise.resolve([]),
-    ]);
+    // Only fetch the cosmetic lists whose toggle is on.
+    const files = [];
+    if (state.cosmeticAds) files.push("cosmetic-ads.json");
+    if (state.cookies) files.push("cosmetic-cookies.json");
+    if (state.social) files.push("cosmetic-social.json");
+    if (state.annoyances) files.push("cosmetic-annoyances.json");
+    const lists = await Promise.all(files.map(loadBundled));
 
     let generic = [];
     try {
       const mod = await import(chrome.runtime.getURL("src/content/cosmetic-select.js"));
-      generic = mod.selectCosmetic({
-        host, cosmeticAds: state.cosmeticAds, cookies: state.cookies, ads, cookieList,
-      });
+      generic = mod.selectCosmetic(host, lists);
     } catch {
-      // Fallback: apply whatever lists were loaded (toggles already gated the fetch).
-      generic = [...ads, ...cookieList]
+      generic = lists.flat()
         .filter((c) => c.domains.length === 0 || c.domains.some((d) => host.endsWith(d)))
         .map((c) => c.selector);
     }

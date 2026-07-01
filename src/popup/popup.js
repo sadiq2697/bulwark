@@ -1,4 +1,5 @@
 import { MSG } from "../lib/messages.js";
+import { initTheme } from "../lib/theme.js";
 
 const $ = (id) => document.getElementById(id);
 function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
@@ -44,6 +45,17 @@ function sparkline(days) {
   svg.append(a, l);
   const axis = $("chartaxis");
   axis.replaceChildren();
+  if (days.length > 8) {
+    // Too many points to label each day: show first and last dates only.
+    const ends = [days[0].day, days[days.length - 1].day];
+    for (const day of ends) {
+      const span = document.createElement("span");
+      span.textContent = day.slice(5); // MM-DD
+      axis.appendChild(span);
+    }
+    axis.style.justifyContent = "space-between";
+    return;
+  }
   const dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   for (const d of days) {
     const [y, m, dd] = d.day.split("-").map(Number);
@@ -51,6 +63,12 @@ function sparkline(days) {
     span.textContent = dow[new Date(y, m - 1, dd).getDay()];
     axis.appendChild(span);
   }
+}
+
+async function loadStats(days) {
+  const detail = await chrome.runtime.sendMessage({ type: MSG.GET_STATS_DETAIL, days });
+  sparkline(detail.last);
+  breakdown(detail.totals);
 }
 
 function breakdown(totals) {
@@ -80,15 +98,23 @@ async function init() {
   $("siteLabel").textContent = host || "This site";
 
   const state = await chrome.runtime.sendMessage({ type: MSG.GET_STATE, host });
+  initTheme(state.theme || "system");
   renderStatus(state.enabled, state.siteAllowed);
 
   const stats = await chrome.runtime.sendMessage({ type: MSG.GET_STATS, tabId: tab.id });
   $("pageCount").textContent = stats.tab.toLocaleString();
   $("totalCount").textContent = stats.total.toLocaleString();
 
-  const detail = await chrome.runtime.sendMessage({ type: MSG.GET_STATS_DETAIL });
-  sparkline(detail.last);
-  breakdown(detail.totals);
+  await loadStats(7);
+
+  $("openLog").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("pages/log.html") });
+    window.close();
+  });
+  document.querySelectorAll(".pchip").forEach((c) => c.addEventListener("click", () => {
+    document.querySelectorAll(".pchip").forEach((x) => x.classList.toggle("active", x === c));
+    loadStats(Number(c.dataset.days));
+  }));
 
   $("siteToggle").addEventListener("change", async () => {
     await chrome.runtime.sendMessage({ type: MSG.TOGGLE_SITE, host });

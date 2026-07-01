@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bulwark",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Block ads, trackers, and distracting sites.",
   "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "storage", "scripting", "tabs", "alarms", "webNavigation", "contextMenus", "privacy"],
   "host_permissions": ["<all_urls>"],
@@ -13,7 +13,7 @@
     { "matches": ["<all_urls>"], "js": ["src/content/cosmetic.js"], "run_at": "document_start" }
   ],
   "web_accessible_resources": [
-    { "resources": ["src/content/picker.js", "src/content/selector.js", "src/content/cosmetic-select.js", "pages/blocked.html"], "matches": ["<all_urls>"] }
+    { "resources": ["src/content/picker.js", "src/content/selector.js", "src/content/cosmetic-select.js", "rules/cosmetic-ads.json", "rules/cosmetic-cookies.json", "rules/cosmetic-social.json", "rules/cosmetic-annoyances.json", "pages/blocked.html"], "matches": ["<all_urls>"] }
   ],
   "commands": {
     "toggle-site": { "suggested_key": { "default": "Ctrl+Shift+B", "mac": "Command+Shift+B" }, "description": "Toggle blocking on the current site" }
@@ -21,7 +21,10 @@
   "declarative_net_request": {
     "rule_resources": [
       { "id": "ads", "enabled": true, "path": "rules/easylist.json" },
-      { "id": "privacy", "enabled": true, "path": "rules/easyprivacy.json" }
+      { "id": "privacy", "enabled": true, "path": "rules/easyprivacy.json" },
+      { "id": "social", "enabled": false, "path": "rules/social.json" },
+      { "id": "annoyances", "enabled": false, "path": "rules/annoyances.json" },
+      { "id": "security", "enabled": false, "path": "rules/security.json" }
     ]
   }
 }

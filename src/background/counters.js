@@ -3,6 +3,10 @@ import { dayKey, categoryFor, summarize, pruneDays } from "../lib/stats.js";
 
 const perTab = new Map();
 let badgeEnabled = true;
+const LOG = []; // ring buffer of recent blocked requests
+const LOG_MAX = 200;
+
+export function getLog() { return LOG.slice().reverse(); }
 
 export function setBadgeEnabled(v) {
   badgeEnabled = !!v;
@@ -44,11 +48,11 @@ export async function getStats(tabId) {
   return { tab: perTab.get(tabId) || 0, total: (total.total || 0) + pending.total };
 }
 
-export async function getStatsDetail() {
+export async function getStatsDetail(days = 7) {
   await flush();
   const total = await getLocal("counters", { total: 0 });
   const stats = await getLocal("stats", { days: {} });
-  const { last, totals } = summarize(stats.days, dayKey(new Date()), 7);
+  const { last, totals } = summarize(stats.days, dayKey(new Date()), days);
   return { total: total.total || 0, last, totals };
 }
 
@@ -68,6 +72,8 @@ export function initCounters() {
     const cat = categoryFor(info.rule && info.rule.rulesetId);
     pending.total += 1;
     pending.today[cat] += 1;
+    LOG.push({ url: info.request.url, category: cat, tabId, t: Date.now() });
+    if (LOG.length > LOG_MAX) LOG.shift();
     scheduleFlush();
   });
   chrome.tabs.onRemoved.addListener((tabId) => perTab.delete(tabId));
