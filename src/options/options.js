@@ -39,6 +39,55 @@ function showSection(sec) {
   document.querySelectorAll(".navitem").forEach((n) => n.classList.toggle("active", n.dataset.sec === sec));
   document.querySelectorAll(".sec").forEach((s) => s.classList.toggle("hidden", s.dataset.sec !== sec));
   if (sec === "rulelimits") renderLimits();
+  if (sec === "filters") renderListInfo();
+  if (sec === "dashboard") renderDashboard();
+}
+
+function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
+function fmtBytes(n) {
+  const u = ["B", "KB", "MB", "GB"]; let i = 0;
+  while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+  return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${u[i]}`;
+}
+function fmtDuration(ms) {
+  const s = ms / 1000;
+  if (s < 60) return `${Math.round(s)}s`;
+  const m = s / 60;
+  return m < 60 ? `${m.toFixed(1)} min` : `${(m / 60).toFixed(1)} h`;
+}
+
+async function renderDashboard() {
+  const detail = await chrome.runtime.sendMessage({ type: MSG.GET_STATS_DETAIL, days: 30 });
+  const total = (detail && detail.total) || 0;
+  $("dbTotal").textContent = total.toLocaleString();
+  $("dbData").textContent = fmtBytes(total * 51200); // ~50 KB average per blocked request
+  $("dbTime").textContent = fmtDuration(total * 50); // ~50 ms average per request
+  const log = await chrome.runtime.sendMessage({ type: MSG.GET_LOG });
+  const counts = {};
+  for (const e of (log && log.entries) || []) { const h = hostOf(e.url); if (h) counts[h] = (counts[h] || 0) + 1; }
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const ul = $("topDomains");
+  ul.replaceChildren();
+  if (!top.length) {
+    const li = document.createElement("li");
+    li.textContent = "Nothing blocked yet this session.";
+    ul.appendChild(li);
+    return;
+  }
+  for (const [host, n] of top) {
+    const li = document.createElement("li");
+    const s = document.createElement("span"); s.textContent = host;
+    const c = document.createElement("span"); c.className = "cnt"; c.textContent = n.toLocaleString();
+    li.append(s, c); ul.appendChild(li);
+  }
+}
+
+async function renderListInfo() {
+  const info = await chrome.runtime.sendMessage({ type: MSG.GET_LIST_INFO });
+  if (!info) return;
+  const when = info.updatedAt ? new Date(info.updatedAt).toLocaleString() : "not yet";
+  $("listInfo").textContent =
+    `Last checked: ${when}. Custom lists (${info.customCount}) update automatically. Built-in lists refresh when Bulwark is updated.`;
 }
 
 async function renderLimits() {
@@ -96,6 +145,7 @@ async function render() {
   });
   document.querySelectorAll("[data-track]").forEach((cb) => { cb.checked = !!s.tracking[cb.dataset.track]; });
   document.querySelectorAll("[data-ui]").forEach((cb) => { cb.checked = !!s.ui[cb.dataset.ui]; });
+  document.querySelectorAll("[data-scriptlet]").forEach((cb) => { cb.checked = !!s.scriptlets[cb.dataset.scriptlet]; });
   $("invertAllowlist").checked = !!s.invertAllowlist;
   $("userRules").value = s.userRules || "";
   $("themeBtn").textContent = THEME_LABEL[s.ui.theme] || "System";
@@ -125,6 +175,11 @@ function wire() {
   document.querySelectorAll("[data-ui]").forEach((cb) => cb.addEventListener("change", async () => {
     const s = await getSettings();
     await setSettings({ ui: { ...s.ui, [cb.dataset.ui]: cb.checked } });
+    await resync();
+  }));
+  document.querySelectorAll("[data-scriptlet]").forEach((cb) => cb.addEventListener("change", async () => {
+    const s = await getSettings();
+    await setSettings({ scriptlets: { ...s.scriptlets, [cb.dataset.scriptlet]: cb.checked } });
     await resync();
   }));
   $("invertAllowlist").addEventListener("change", async (e) => {
@@ -171,6 +226,12 @@ function wire() {
     });
   }
 
+  $("updateLists").addEventListener("click", async () => {
+    $("updateLists").textContent = "Updating...";
+    await chrome.runtime.sendMessage({ type: MSG.UPDATE_LISTS });
+    await renderListInfo();
+    $("updateLists").textContent = "Update now";
+  });
   $("exportSettings").addEventListener("click", async () => {
     const s = await getSettings();
     download("bulwark-settings.json", JSON.stringify(s, null, 2));

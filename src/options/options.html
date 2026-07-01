@@ -6,6 +6,7 @@
     <div class="brand"><img src="../../icons/icon48.png" alt="" width="24" height="24"><span>Bulwark</span></div>
     <nav id="nav">
       <button class="navitem active" data-sec="general">General</button>
+      <button class="navitem" data-sec="dashboard">Dashboard</button>
       <button class="navitem" data-sec="filters">Filters</button>
       <button class="navitem" data-sec="tracking">Tracking protection</button>
       <button class="navitem" data-sec="allowlist">Allowlist</button>
@@ -32,8 +33,21 @@
       <input type="file" id="importFile" accept="application/json" hidden>
     </section>
 
+    <section class="sec hidden" data-sec="dashboard">
+      <h1>Dashboard</h1>
+      <div class="stat-grid">
+        <div class="stat"><b id="dbTotal">0</b><small>requests blocked</small></div>
+        <div class="stat"><b id="dbData">0</b><small>data saved (estimate)</small></div>
+        <div class="stat"><b id="dbTime">0</b><small>time saved (estimate)</small></div>
+      </div>
+      <h2>Top blocked domains (this session)</h2>
+      <ul id="topDomains" class="list"></ul>
+    </section>
+
     <section class="sec hidden" data-sec="filters">
       <h1>Filters</h1>
+      <div class="field"><div><div class="ftitle">List updates</div><div class="fdesc" id="listInfo">Custom lists update automatically. Built-in lists refresh when Bulwark is updated.</div></div>
+        <button id="updateLists" class="ghost">Update now</button></div>
       <h2>Network blocking</h2>
       <div class="field"><div><div class="ftitle">Block ads</div><div class="fdesc">EasyList</div></div>
         <label class="switch"><input type="checkbox" data-ruleset="ads"><span class="slider"></span></label></div>
@@ -114,6 +128,8 @@
         <label class="switch"><input type="checkbox" data-ui="badge"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Right-click menu</div><div class="fdesc">Add "Hide an element" and "Toggle blocking" to the page menu.</div></div>
         <label class="switch"><input type="checkbox" data-ui="contextMenu"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Block popups and popunders</div><div class="fdesc">Stops windows that open without a click. Rarely, this can block a wanted popup.</div></div>
+        <label class="switch"><input type="checkbox" data-scriptlet="popups"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Invert allowlist</div><div class="fdesc">Block only on the sites in your allowlist, and allow everywhere else.</div></div>
         <label class="switch"><input type="checkbox" id="invertAllowlist"><span class="slider"></span></label></div>
     </section>
