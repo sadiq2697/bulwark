@@ -2,28 +2,78 @@
 <html>
 <head><meta charset="utf-8"><link rel="stylesheet" href="options.css"></head>
 <body>
-  <h1>Bulwark Settings</h1>
-  <section><h2>Network blocking</h2>
-    <label><input type="checkbox" data-ruleset="ads"> Block ads (EasyList)</label>
-    <label><input type="checkbox" data-ruleset="privacy"> Block trackers (EasyPrivacy)</label>
-  </section>
-  <section><h2>On-page hiding</h2>
-    <label><input type="checkbox" data-ruleset="cosmeticAds"> Hide leftover ad elements on pages</label>
-    <label><input type="checkbox" data-ruleset="cookies"> Dismiss cookie banners</label>
-  </section>
-  <section><h2>Blocked sites</h2>
-    <div class="add"><input id="blockInput" type="text" placeholder="example.com"><button id="blockAdd">Add</button></div>
-    <ul id="blockList"></ul>
-  </section>
-  <section><h2>Schedule</h2>
-    <label><input type="checkbox" id="schedEnabled"> Only block distracting sites during hours</label>
-    <div class="times"><button id="startBtn" class="pick-time">Start: 09:00</button><button id="endBtn" class="pick-time">End: 17:00</button></div>
-  </section>
-  <section><h2>Custom filter lists</h2>
-    <div class="add"><input id="listInput" type="text" placeholder="https://example.com/list.txt"><button id="listAdd">Add</button></div>
-    <ul id="listUrls"></ul>
-  </section>
-  <section><h2>Picked elements</h2><button id="clearPicked" class="danger">Clear all picked elements</button></section>
+  <aside class="side">
+    <div class="brand"><img src="../../icons/icon48.png" alt="" width="24" height="24"><span>Bulwark</span></div>
+    <nav id="nav">
+      <button class="navitem active" data-sec="general">General</button>
+      <button class="navitem" data-sec="filters">Filters</button>
+      <button class="navitem" data-sec="allowlist">Allowlist</button>
+      <button class="navitem" data-sec="blocked">Blocked sites</button>
+      <button class="navitem" data-sec="schedule">Schedule</button>
+      <button class="navitem" data-sec="custom">Custom lists</button>
+      <button class="navitem" data-sec="about">About</button>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <section class="sec" data-sec="general">
+      <h1>General</h1>
+      <div class="field"><div><div class="ftitle">Enable Bulwark</div><div class="fdesc">Turn all blocking on or off.</div></div>
+        <label class="switch"><input type="checkbox" id="enabled"><span class="slider"></span></label></div>
+    </section>
+
+    <section class="sec hidden" data-sec="filters">
+      <h1>Filters</h1>
+      <h2>Network blocking</h2>
+      <div class="field"><div><div class="ftitle">Block ads</div><div class="fdesc">EasyList</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="ads"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Block trackers</div><div class="fdesc">EasyPrivacy</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="privacy"><span class="slider"></span></label></div>
+      <h2>On-page hiding</h2>
+      <div class="field"><div><div class="ftitle">Hide leftover ad elements</div><div class="fdesc">Cosmetic filtering</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="cosmeticAds"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Dismiss cookie banners</div><div class="fdesc">Fanboy's Cookiemonster</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="cookies"><span class="slider"></span></label></div>
+    </section>
+
+    <section class="sec hidden" data-sec="allowlist">
+      <h1>Allowlist</h1>
+      <p class="lead">Bulwark does not block on sites in this list.</p>
+      <div class="add"><input id="allowInput" type="text" placeholder="example.com"><button id="allowAdd">Add</button></div>
+      <ul id="allowList" class="list"></ul>
+    </section>
+
+    <section class="sec hidden" data-sec="blocked">
+      <h1>Blocked sites</h1>
+      <p class="lead">These sites are blocked for focus. Add a schedule to limit when.</p>
+      <div class="add"><input id="blockInput" type="text" placeholder="example.com"><button id="blockAdd">Add</button></div>
+      <ul id="blockList" class="list"></ul>
+    </section>
+
+    <section class="sec hidden" data-sec="schedule">
+      <h1>Schedule</h1>
+      <div class="field"><div><div class="ftitle">Limit blocked sites to hours</div><div class="fdesc">Only redirect blocked sites during the window below.</div></div>
+        <label class="switch"><input type="checkbox" id="schedEnabled"><span class="slider"></span></label></div>
+      <div class="times"><button id="startBtn" class="pick-time">Start: 09:00</button><button id="endBtn" class="pick-time">End: 17:00</button></div>
+    </section>
+
+    <section class="sec hidden" data-sec="custom">
+      <h1>Custom lists</h1>
+      <p class="lead">Add filter-list URLs. They update automatically.</p>
+      <div class="add"><input id="listInput" type="text" placeholder="https://example.com/list.txt"><button id="listAdd">Add</button></div>
+      <ul id="listUrls" class="list"></ul>
+      <h2>Picked elements</h2>
+      <button id="clearPicked" class="danger">Clear all picked elements</button>
+    </section>
+
+    <section class="sec hidden" data-sec="about">
+      <h1>About</h1>
+      <p class="lead">Bulwark <span id="ver"></span></p>
+      <p class="fdesc">A Manifest V3 extension that blocks ads, trackers, and distracting sites.</p>
+      <p><a id="repo" href="https://github.com/sadiq2697/bulwark" target="_blank" rel="noopener">Source on GitHub</a></p>
+    </section>
+  </main>
+
   <script type="module" src="options.js"></script>
 </body>
 </html>
