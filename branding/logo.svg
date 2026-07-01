@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="150" viewBox="0 0 560 150">
+  <rect x="0" y="0" width="560" height="150" rx="24" fill="#151b28"/>
+  <g transform="translate(28,27) scale(0.75)">
+    <path d="M64 20 L100 32 V63 C100 88 84 102 64 110 C44 102 28 88 28 63 V32 Z"
+          fill="#d63a2b" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
+    <g fill="#ffffff">
+      <rect x="43" y="45" width="9" height="11"/>
+      <rect x="59" y="45" width="10" height="11"/>
+      <rect x="76" y="45" width="9" height="11"/>
+      <rect x="43" y="56" width="42" height="9"/>
+    </g>
+    <rect x="60" y="70" width="8" height="22" rx="4" fill="#ffffff"/>
+  </g>
+  <text x="150" y="78" font-family="'Segoe UI', system-ui, sans-serif" font-size="46" font-weight="800" fill="#ffffff" letter-spacing="0.5">Bulwark</text>
+  <text x="152" y="104" font-family="'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="500" fill="#8a93a6">Block ads, trackers, and distractions</text>
+</svg>

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="branding/logo.png" alt="Bulwark" width="440">
+</p>
+
 # Bulwark
 
 A Manifest V3 Chrome extension for blocking ads, trackers, and distracting sites, with cosmetic element hiding, an element picker, cookie-banner auto-dismiss, per-site controls, scheduling, block stats, and settings sync.

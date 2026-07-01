@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><link rel="stylesheet" href="options.css"></head>
+<body>
+  <h1>Bulwark Settings</h1>
+  <section><h2>Filter lists</h2>
+    <label><input type="checkbox" data-ruleset="ads"> Block ads (EasyList)</label>
+    <label><input type="checkbox" data-ruleset="privacy"> Block trackers (EasyPrivacy)</label>
+    <label><input type="checkbox" data-ruleset="cookies"> Dismiss cookie banners</label>
+  </section>
+  <section><h2>Blocked sites</h2>
+    <div class="add"><input id="blockInput" type="text" placeholder="example.com"><button id="blockAdd">Add</button></div>
+    <ul id="blockList"></ul>
+  </section>
+  <section><h2>Schedule</h2>
+    <label><input type="checkbox" id="schedEnabled"> Only block distracting sites during hours</label>
+    <div class="times"><button id="startBtn" class="pick-time">Start: 09:00</button><button id="endBtn" class="pick-time">End: 17:00</button></div>
+  </section>
+  <section><h2>Custom filter lists</h2>
+    <div class="add"><input id="listInput" type="text" placeholder="https://example.com/list.txt"><button id="listAdd">Add</button></div>
+    <ul id="listUrls"></ul>
+  </section>
+  <section><h2>Picked elements</h2><button id="clearPicked" class="danger">Clear all picked elements</button></section>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
