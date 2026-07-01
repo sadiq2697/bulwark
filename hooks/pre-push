@@ -1,0 +1,48 @@
+#!/bin/sh
+# Ensures every branch push advances the version and carries a matching tag.
+#
+# - Runs only when a branch (refs/heads/*) is being pushed. Tag-only pushes are
+#   left alone, so pushing a release tag never bumps the version.
+# - If the version has not changed since the upstream tip, bump the patch,
+#   commit it, create the tag, and stop this push so the bump is included next
+#   time (loop-safe: once bumped, the push proceeds).
+# - Creates the annotated tag v<version> if missing so `push.followTags` sends it.
+set -e
+
+root="$(git rev-parse --show-toplevel)"
+verof() { sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' "$1" | head -1; }
+
+# Only act when a branch ref is part of this push (skip tag-only pushes).
+pushing_branch=0
+while read -r _local _lsha remote _rsha; do
+  case "$remote" in
+    refs/heads/*) pushing_branch=1 ;;
+  esac
+done
+[ "$pushing_branch" = "1" ] || exit 0
+
+cur="$(verof "$root/package.json")"
+
+up=""
+if upref="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null)"; then
+  up="$(git show "$upref:package.json" 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' | head -1)"
+fi
+
+ensure_tag() {
+  if ! git rev-parse -q --verify "refs/tags/v$1" >/dev/null 2>&1; then
+    git tag -a "v$1" -m "Bulwark v$1"
+  fi
+}
+
+if [ -z "$up" ] || [ "$cur" != "$up" ]; then
+  ensure_tag "$cur"        # already advanced (or first push): tag and allow
+  exit 0
+fi
+
+node "$root/scripts/bump.mjs" patch
+new="$(verof "$root/package.json")"
+git add "$root/package.json" "$root/manifest.json"
+git commit -m "chore: bump version to $new" >/dev/null
+ensure_tag "$new"
+echo "Bulwark: version bumped to $new and tagged v$new. Run 'git push' again to include it." >&2
+exit 1
