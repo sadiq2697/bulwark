@@ -8,6 +8,7 @@ export const DEFAULTS = {
   pickedSelectors: {},
   rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true, social: false, annoyances: false, security: false },
   tracking: { webrtc: false, gpc: false, xclientdata: false },
+  scriptlets: { popups: false },
   ui: { badge: true, contextMenu: true, theme: "system" },
   invertAllowlist: false,
 };
@@ -20,6 +21,7 @@ export async function getSettings() {
     schedule: { ...DEFAULTS.schedule, ...(stored.schedule || {}) },
     rulesets: { ...DEFAULTS.rulesets, ...(stored.rulesets || {}) },
     tracking: { ...DEFAULTS.tracking, ...(stored.tracking || {}) },
+    scriptlets: { ...DEFAULTS.scriptlets, ...(stored.scriptlets || {}) },
     ui: { ...DEFAULTS.ui, ...(stored.ui || {}) },
     pickedSelectors: stored.pickedSelectors || {},
   };

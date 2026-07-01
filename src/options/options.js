@@ -96,6 +96,7 @@ async function render() {
   });
   document.querySelectorAll("[data-track]").forEach((cb) => { cb.checked = !!s.tracking[cb.dataset.track]; });
   document.querySelectorAll("[data-ui]").forEach((cb) => { cb.checked = !!s.ui[cb.dataset.ui]; });
+  document.querySelectorAll("[data-scriptlet]").forEach((cb) => { cb.checked = !!s.scriptlets[cb.dataset.scriptlet]; });
   $("invertAllowlist").checked = !!s.invertAllowlist;
   $("userRules").value = s.userRules || "";
   $("themeBtn").textContent = THEME_LABEL[s.ui.theme] || "System";
@@ -125,6 +126,11 @@ function wire() {
   document.querySelectorAll("[data-ui]").forEach((cb) => cb.addEventListener("change", async () => {
     const s = await getSettings();
     await setSettings({ ui: { ...s.ui, [cb.dataset.ui]: cb.checked } });
+    await resync();
+  }));
+  document.querySelectorAll("[data-scriptlet]").forEach((cb) => cb.addEventListener("change", async () => {
+    const s = await getSettings();
+    await setSettings({ scriptlets: { ...s.scriptlets, [cb.dataset.scriptlet]: cb.checked } });
     await resync();
   }));
   $("invertAllowlist").addEventListener("change", async (e) => {

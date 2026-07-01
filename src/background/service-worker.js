@@ -72,7 +72,22 @@ async function setupContextMenu(s) {
   chrome.contextMenus.create({ id: "bulwark-allow", title: "Toggle blocking on this site", contexts: ["page"] });
 }
 
-// Applies settings that are not DNR rules: badge visibility, WebRTC policy, context menu.
+async function applyScriptlets(s) {
+  const ID = "bulwark-scriptlets";
+  try {
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [ID] });
+    if (s.scriptlets.popups && !existing.length) {
+      await chrome.scripting.registerContentScripts([{
+        id: ID, matches: ["<all_urls>"], js: ["src/content/scriptlets.js"],
+        runAt: "document_start", world: "MAIN", allFrames: true,
+      }]);
+    } else if (!s.scriptlets.popups && existing.length) {
+      await chrome.scripting.unregisterContentScripts({ ids: [ID] });
+    }
+  } catch { /* registerContentScripts world:MAIN needs a recent Chrome */ }
+}
+
+// Applies settings that are not DNR rules: badge visibility, WebRTC policy, context menu, scriptlets.
 async function applySideSettings() {
   const s = await getSettings();
   setBadgeEnabled(s.ui.badge);
@@ -81,6 +96,7 @@ async function applySideSettings() {
     if (p) p.set({ value: s.tracking.webrtc ? "default_public_interface_only" : "default" });
   } catch { /* privacy API may be unavailable */ }
   await setupContextMenu(s);
+  await applyScriptlets(s);
 }
 
 // Rebuilds everything including custom lists and user rules (used on install,
