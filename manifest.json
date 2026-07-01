@@ -3,7 +3,7 @@
   "name": "Bulwark",
   "version": "0.1.0",
   "description": "Block ads, trackers, and distracting sites.",
-  "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "storage", "scripting", "tabs", "alarms"],
+  "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "storage", "scripting", "tabs", "alarms", "webNavigation"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background/service-worker.js", "type": "module" },
   "action": { "default_popup": "src/popup/popup.html", "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png" } },

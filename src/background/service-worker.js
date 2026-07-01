@@ -82,6 +82,16 @@ chrome.commands.onCommand.addListener(async (cmd) => {
   if (tab?.url) await toggleSite(hostOf(tab.url));
 });
 
+// When a top-frame navigation to an ad domain is blocked, Chrome shows a bare
+// ERR_BLOCKED_BY_CLIENT page. Replace it with our own blocked page. Sub-resource
+// blocks never trigger a navigation error, so only clicked ad links are affected.
+chrome.webNavigation.onErrorOccurred.addListener((d) => {
+  if (d.frameId !== 0) return;
+  if (typeof d.error === "string" && d.error.includes("BLOCKED_BY_CLIENT")) {
+    chrome.tabs.update(d.tabId, { url: chrome.runtime.getURL("pages/blocked.html") }).catch(() => {});
+  }
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     if (msg.type === MSG.GET_STATE) {
