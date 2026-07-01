@@ -56,6 +56,9 @@ body { width: 320px; margin: 0; background: var(--bg); color: var(--ink);
 .row:hover { background: #f2f4f7; }
 .ri { width: 20px; text-align: center; color: var(--danger); }
 
+.period { display: flex; gap: 6px; margin-bottom: 10px; }
+.pchip { border: 1px solid var(--line); background: #fff; color: var(--ink2); border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 12px; }
+.pchip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 .chartwrap { border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px 6px; }
 #spark { width: 100%; height: 72px; display: block; }
 .chartaxis { display: flex; justify-content: space-between; color: var(--ink2); font-size: 10px; padding: 4px 2px 0; }

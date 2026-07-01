@@ -1,7 +1,7 @@
 import { getSettings, setSettings, getLocal, setLocal } from "../lib/storage.js";
 import { allowlistRules, blocklistRules, trackingRules, RESERVED } from "./dnr.js";
 import { isWithinWindow } from "./schedule.js";
-import { initCounters, getStats, getStatsDetail, setBadgeEnabled } from "./counters.js";
+import { initCounters, getStats, getStatsDetail, getLog, setBadgeEnabled } from "./counters.js";
 import { convertList } from "../lib/filter-converter.js";
 import { MSG } from "../lib/messages.js";
 
@@ -158,7 +158,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === MSG.GET_STATS) {
       sendResponse(await getStats(msg.tabId));
     } else if (msg.type === MSG.GET_STATS_DETAIL) {
-      sendResponse(await getStatsDetail());
+      sendResponse(await getStatsDetail(msg.days || 7));
+    } else if (msg.type === MSG.GET_LOG) {
+      sendResponse({ entries: getLog() });
     } else if (msg.type === MSG.GET_RULE_LIMITS) {
       const dnr = chrome.declarativeNetRequest;
       const [enabled, dynamic] = await Promise.all([
