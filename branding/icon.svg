@@ -1,14 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect x="0" y="0" width="128" height="128" rx="28" fill="#151b28"/>
-  <!-- shield -->
-  <path d="M64 20 L100 32 V63 C100 88 84 102 64 110 C44 102 28 88 28 63 V32 Z"
-        fill="#d63a2b" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
-  <!-- battlement crown (bulwark wall) -->
+  <!-- backdrop -->
+  <rect x="0" y="0" width="128" height="128" rx="28" fill="#141a26"/>
+  <rect x="0" y="64" width="128" height="64" rx="28" fill="#0f141d" opacity="0.6"/>
+  <!-- shield base -->
+  <path d="M64 18 L101 31 V64 C101 89 85 104 64 112 C43 104 27 89 27 64 V31 Z"
+        fill="#c9382a" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
+  <!-- top sheen for depth (kept inside the shield silhouette) -->
+  <path d="M64 24 L95 35 V60 C95 72 82 80 64 85 C46 80 33 72 33 60 V35 Z"
+        fill="#e5533f" opacity="0.55"/>
+  <!-- battlement crown (the bulwark wall) -->
   <g fill="#ffffff">
-    <rect x="43" y="45" width="9" height="11"/>
-    <rect x="59" y="45" width="10" height="11"/>
-    <rect x="76" y="45" width="9" height="11"/>
-    <rect x="43" y="56" width="42" height="9"/>
+    <rect x="44" y="46" width="9" height="11" rx="1"/>
+    <rect x="59.5" y="46" width="9" height="11" rx="1"/>
+    <rect x="75" y="46" width="9" height="11" rx="1"/>
+    <rect x="44" y="57" width="40" height="9" rx="1"/>
   </g>
   <!-- gate slit -->
   <rect x="60" y="70" width="8" height="22" rx="4" fill="#ffffff"/>

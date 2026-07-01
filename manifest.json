@@ -13,7 +13,7 @@
     { "matches": ["<all_urls>"], "js": ["src/content/cosmetic.js"], "run_at": "document_start" }
   ],
   "web_accessible_resources": [
-    { "resources": ["src/content/picker.js", "src/content/selector.js", "pages/blocked.html"], "matches": ["<all_urls>"] }
+    { "resources": ["src/content/picker.js", "src/content/selector.js", "src/content/cosmetic-select.js", "pages/blocked.html"], "matches": ["<all_urls>"] }
   ],
   "commands": {
     "toggle-site": { "suggested_key": { "default": "Ctrl+Shift+B", "mac": "Command+Shift+B" }, "description": "Toggle blocking on the current site" }
