@@ -70,6 +70,9 @@ async function render() {
   renderList($("listUrls"), s.customListUrls, async (u) => {
     await setSettings({ customListUrls: s.customListUrls.filter((x) => x !== u) }); await resync(); render();
   });
+  document.querySelectorAll("[data-track]").forEach((cb) => { cb.checked = !!s.tracking[cb.dataset.track]; });
+  document.querySelectorAll("[data-ui]").forEach((cb) => { cb.checked = !!s.ui[cb.dataset.ui]; });
+  $("invertAllowlist").checked = !!s.invertAllowlist;
   $("userRules").value = s.userRules || "";
   $("ver").textContent = "v" + chrome.runtime.getManifest().version;
 }
@@ -88,6 +91,19 @@ function wire() {
     await setSettings({ rulesets: { ...s.rulesets, [cb.dataset.ruleset]: cb.checked } });
     await resync();
   }));
+  document.querySelectorAll("[data-track]").forEach((cb) => cb.addEventListener("change", async () => {
+    const s = await getSettings();
+    await setSettings({ tracking: { ...s.tracking, [cb.dataset.track]: cb.checked } });
+    await resync();
+  }));
+  document.querySelectorAll("[data-ui]").forEach((cb) => cb.addEventListener("change", async () => {
+    const s = await getSettings();
+    await setSettings({ ui: { ...s.ui, [cb.dataset.ui]: cb.checked } });
+    await resync();
+  }));
+  $("invertAllowlist").addEventListener("change", async (e) => {
+    await setSettings({ invertAllowlist: e.target.checked }); await resync();
+  });
 
   const adder = (inputId, key) => async () => {
     const v = $(inputId).value.trim(); if (!v) return;

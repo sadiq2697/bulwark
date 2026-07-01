@@ -2,6 +2,12 @@ import { getLocal, setLocal } from "../lib/storage.js";
 import { dayKey, categoryFor, summarize, pruneDays } from "../lib/stats.js";
 
 const perTab = new Map();
+let badgeEnabled = true;
+
+export function setBadgeEnabled(v) {
+  badgeEnabled = !!v;
+  if (!badgeEnabled) chrome.action.setBadgeText({ text: "" });
+}
 
 // Batched accumulator: blocked events can arrive rapidly, so we coalesce writes
 // to storage instead of writing on every match.
@@ -54,8 +60,10 @@ export function initCounters() {
     if (tabId >= 0) {
       const n = (perTab.get(tabId) || 0) + 1;
       perTab.set(tabId, n);
-      chrome.action.setBadgeText({ tabId, text: n ? String(n) : "" });
-      chrome.action.setBadgeBackgroundColor({ tabId, color: "#c0392b" });
+      if (badgeEnabled) {
+        chrome.action.setBadgeText({ tabId, text: n ? String(n) : "" });
+        chrome.action.setBadgeBackgroundColor({ tabId, color: "#c0392b" });
+      }
     }
     const cat = categoryFor(info.rule && info.rule.rulesetId);
     pending.total += 1;
