@@ -37,6 +37,7 @@ export function convertNetworkRule(line, id) {
   const excludedTypes = [];
   const domainsInclude = [];
   const domainsExclude = [];
+  let wantsMainFrame = false; // set by $popup/$document/$all
   for (const opt of options) {
     if (opt.startsWith("domain=")) {
       for (const d of opt.slice(7).split("|")) {
@@ -49,13 +50,26 @@ export function convertNetworkRule(line, id) {
     const name = neg ? opt.slice(1) : opt;
     const mapped = OPTION_TO_TYPE[name] || name;
     if (RESOURCE_TYPES.has(mapped)) { (neg ? excludedTypes : resourceTypes).push(mapped); continue; }
-    if (["third-party", "3p", "first-party", "1p", "important", "all", "document", "popup"].includes(name)) continue;
+    if (["popup", "document", "all"].includes(name)) { wantsMainFrame = true; continue; }
+    if (["third-party", "3p", "first-party", "1p", "important"].includes(name)) continue;
     return { skipped: raw };
   }
 
+  // Whole-domain anchor rules (||host^) should also block top-frame navigations,
+  // otherwise clicking an ad link opens it. Chrome omits main_frame by default
+  // when resourceTypes is unset, so we add it explicitly for these cases only.
+  const isDomainAnchor = /^\|\|[a-z0-9._-]+\^?$/i.test(body);
+
   const condition = { urlFilter: body };
-  if (resourceTypes.length) condition.resourceTypes = [...new Set(resourceTypes)];
-  if (excludedTypes.length) condition.excludedResourceTypes = [...new Set(excludedTypes)];
+  if (resourceTypes.length) {
+    const set = new Set(resourceTypes);
+    if (wantsMainFrame) set.add("main_frame");
+    condition.resourceTypes = [...set];
+  } else if (excludedTypes.length) {
+    condition.excludedResourceTypes = [...new Set(excludedTypes)];
+  } else if (isDomainAnchor || wantsMainFrame) {
+    condition.resourceTypes = [...RESOURCE_TYPES, "main_frame"];
+  }
   if (domainsInclude.length) condition.initiatorDomains = domainsInclude;
   if (domainsExclude.length) condition.excludedInitiatorDomains = domainsExclude;
 

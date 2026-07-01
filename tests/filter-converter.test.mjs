@@ -30,6 +30,27 @@ test("regex rules are skipped", () => {
   assert.deepEqual(convertNetworkRule("/banner\\d+/", 8), { skipped: "/banner\\d+/" });
 });
 
+test("domain-anchor block rule covers main_frame navigations", () => {
+  const { rule } = convertNetworkRule("||doubleclick.net^", 10);
+  assert.ok(rule.condition.resourceTypes.includes("main_frame"));
+  assert.ok(rule.condition.resourceTypes.includes("script"));
+});
+
+test("path/substring rule does not force main_frame", () => {
+  const { rule } = convertNetworkRule("||example.com/ads/banner.js", 11);
+  assert.equal(rule.condition.resourceTypes, undefined);
+});
+
+test("$popup option maps to main_frame", () => {
+  const { rule } = convertNetworkRule("||ads.example^$popup", 12);
+  assert.ok(rule.condition.resourceTypes.includes("main_frame"));
+});
+
+test("explicit type option is not widened to main_frame", () => {
+  const { rule } = convertNetworkRule("||ads.example^$script", 13);
+  assert.equal(rule.condition.resourceTypes.includes("main_frame"), false);
+});
+
 test("non-ASCII patterns are skipped", () => {
   assert.deepEqual(convertNetworkRule("||exämple.net^", 9), { skipped: "||exämple.net^" });
 });
