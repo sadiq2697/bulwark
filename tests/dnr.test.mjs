@@ -11,10 +11,13 @@ test("allowlist builds allowAllRequests rules", () => {
   assert.ok(rules[0].condition.requestDomains.includes("example.com"));
 });
 
-test("blocklist redirects main_frame to block page", () => {
+test("blocklist redirects main_frame to block page with original url", () => {
   const rules = blocklistRules(["news.com"], "chrome-extension://x/pages/blocked.html");
   assert.equal(rules[0].id, RESERVED.BLOCK_START);
   assert.equal(rules[0].action.type, "redirect");
+  assert.ok(rules[0].action.redirect.regexSubstitution.includes("blocked.html"));
+  assert.ok(rules[0].action.redirect.regexSubstitution.includes("#url="));
+  assert.ok(rules[0].condition.regexFilter.includes("news"));
   assert.equal(rules[0].condition.resourceTypes[0], "main_frame");
 });
 

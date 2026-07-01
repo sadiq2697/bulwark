@@ -24,6 +24,12 @@
       <h1>General</h1>
       <div class="field"><div><div class="ftitle">Enable Bulwark</div><div class="fdesc">Turn all blocking on or off.</div></div>
         <label class="switch"><input type="checkbox" id="enabled"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Theme</div><div class="fdesc">Match your system, or force light or dark.</div></div>
+        <button id="themeBtn" class="pick-time">System</button></div>
+      <h2>Backup</h2>
+      <div class="field"><div><div class="ftitle">Settings backup</div><div class="fdesc">Save all your settings to a file, or restore them.</div></div>
+        <div class="btn-row"><button id="exportSettings" class="ghost">Export</button><button id="importSettings" class="ghost">Import</button></div></div>
+      <input type="file" id="importFile" accept="application/json" hidden>
     </section>
 
     <section class="sec hidden" data-sec="filters">
@@ -38,6 +44,13 @@
         <label class="switch"><input type="checkbox" data-ruleset="cosmeticAds"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Dismiss cookie banners</div><div class="fdesc">Fanboy's Cookiemonster</div></div>
         <label class="switch"><input type="checkbox" data-ruleset="cookies"><span class="slider"></span></label></div>
+      <h2>More lists</h2>
+      <div class="field"><div><div class="ftitle">Block social widgets</div><div class="fdesc">Like and share buttons (Fanboy Social)</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="social"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Block annoyances</div><div class="fdesc">In-page popups and notices (Fanboy Annoyances)</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="annoyances"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Block malware and phishing</div><div class="fdesc">Known malicious hosts (URLhaus)</div></div>
+        <label class="switch"><input type="checkbox" data-ruleset="security"><span class="slider"></span></label></div>
     </section>
 
     <section class="sec hidden" data-sec="tracking">
@@ -55,6 +68,8 @@
       <p class="lead">Bulwark does not block on sites in this list.</p>
       <div class="add"><input id="allowInput" type="text" placeholder="example.com"><button id="allowAdd">Add</button></div>
       <ul id="allowList" class="list"></ul>
+      <div class="btn-row"><button id="allowExport" class="ghost">Export list</button><button id="allowImport" class="ghost">Import list</button></div>
+      <input type="file" id="allowFile" accept=".txt,text/plain" hidden>
     </section>
 
     <section class="sec hidden" data-sec="blocked">
