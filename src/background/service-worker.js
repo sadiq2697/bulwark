@@ -1,7 +1,7 @@
 import { getSettings, setSettings, getLocal, setLocal } from "../lib/storage.js";
 import { allowlistRules, blocklistRules, RESERVED } from "./dnr.js";
 import { isWithinWindow } from "./schedule.js";
-import { initCounters, getStats } from "./counters.js";
+import { initCounters, getStats, getStatsDetail } from "./counters.js";
 import { convertList } from "../lib/filter-converter.js";
 import { MSG } from "../lib/messages.js";
 
@@ -110,6 +110,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse({ siteAllowed: allowed });
     } else if (msg.type === MSG.GET_STATS) {
       sendResponse(await getStats(msg.tabId));
+    } else if (msg.type === MSG.GET_STATS_DETAIL) {
+      sendResponse(await getStatsDetail());
     } else if (msg.type === MSG.GET_SELECTORS) {
       const s = await getSettings();
       const host = msg.host || "";
