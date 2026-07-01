@@ -34,6 +34,8 @@ h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: v
   border-radius: 8px; padding: 9px 12px; font-size: 14px; }
 button { border: 0; border-radius: 8px; padding: 9px 14px; background: var(--active); color: #fff; cursor: pointer; font-size: 14px; }
 button.danger { background: var(--danger); }
+button.ghost { background: #eef0f3; color: var(--ink); }
+.btn-row { display: flex; gap: 8px; }
 
 .list { list-style: none; padding: 0; margin: 0; }
 .list li { display: flex; align-items: center; justify-content: space-between;

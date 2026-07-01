@@ -24,6 +24,10 @@
       <h1>General</h1>
       <div class="field"><div><div class="ftitle">Enable Bulwark</div><div class="fdesc">Turn all blocking on or off.</div></div>
         <label class="switch"><input type="checkbox" id="enabled"><span class="slider"></span></label></div>
+      <h2>Backup</h2>
+      <div class="field"><div><div class="ftitle">Settings backup</div><div class="fdesc">Save all your settings to a file, or restore them.</div></div>
+        <div class="btn-row"><button id="exportSettings" class="ghost">Export</button><button id="importSettings" class="ghost">Import</button></div></div>
+      <input type="file" id="importFile" accept="application/json" hidden>
     </section>
 
     <section class="sec hidden" data-sec="filters">
@@ -55,6 +59,8 @@
       <p class="lead">Bulwark does not block on sites in this list.</p>
       <div class="add"><input id="allowInput" type="text" placeholder="example.com"><button id="allowAdd">Add</button></div>
       <ul id="allowList" class="list"></ul>
+      <div class="btn-row"><button id="allowExport" class="ghost">Export list</button><button id="allowImport" class="ghost">Import list</button></div>
+      <input type="file" id="allowFile" accept=".txt,text/plain" hidden>
     </section>
 
     <section class="sec hidden" data-sec="blocked">
