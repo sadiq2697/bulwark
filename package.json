@@ -1,0 +1,14 @@
+{
+  "name": "bulwark",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build:rules": "node build/generate-rules.mjs",
+    "smoke": "playwright test tests/smoke.spec.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}
