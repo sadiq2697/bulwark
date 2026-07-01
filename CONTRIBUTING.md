@@ -33,6 +33,35 @@ Please make sure `npm test` passes before opening a pull request.
   `tests/`.
 - One logical change per commit, with a clear message.
 
+## Branching model
+
+- `main` is the stable branch. Every release is tagged from `main`.
+- `develop` is the integration branch. Open pull requests against `develop`.
+- Create a short-lived branch per change, named by type:
+  - `feature/<short-name>` for new capabilities
+  - `fix/<short-name>` for bug fixes
+  - `docs/<short-name>` for documentation
+  - `filters/<short-name>` for rule or filter-list improvements
+- When work is ready, PR your branch into `develop`. `develop` merges into `main` for releases.
+
+## Versioning
+
+The version in `package.json` and `manifest.json` is kept in sync and bumped on
+every push. Enable the shared git hook once after cloning:
+
+```
+npm run setup:hooks
+```
+
+With the hook enabled, a push that has not advanced the version will bump the
+patch version, commit it, and ask you to push again. To bump manually:
+
+```
+npm run bump          # patch
+npm run bump:minor
+npm run bump:major
+```
+
 ## Architecture
 
 See `docs/superpowers/specs/` for the design spec and `docs/superpowers/plans/`

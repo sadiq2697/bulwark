@@ -1,0 +1,28 @@
+#!/bin/sh
+# Ensures every push advances the version. If the version has not changed since
+# the upstream tip, bump the patch version, commit it, and stop this push so the
+# bump is included next time. Loop-safe: once bumped, subsequent pushes proceed.
+set -e
+
+root="$(git rev-parse --show-toplevel)"
+getver() { sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' "$1" | head -1; }
+
+cur="$(getver "$root/package.json")"
+
+# Version currently on the upstream branch, if an upstream is configured.
+up=""
+if upref="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null)"; then
+  up="$(git show "$upref:package.json" 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([0-9][0-9.]*\)".*/\1/p' | head -1)"
+fi
+
+# Already advanced since last push (or no upstream yet): allow the push.
+if [ -z "$up" ] || [ "$cur" != "$up" ]; then
+  exit 0
+fi
+
+node "$root/scripts/bump.mjs" patch
+new="$(getver "$root/package.json")"
+git add "$root/package.json" "$root/manifest.json"
+git commit -m "chore: bump version to $new" >/dev/null
+echo "Bulwark: version bumped to $new. Run 'git push' again to include it." >&2
+exit 1

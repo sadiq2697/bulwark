@@ -1,12 +1,16 @@
 {
   "name": "bulwark",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test",
     "build:rules": "node build/generate-rules.mjs",
-    "smoke": "playwright test tests/smoke.spec.mjs"
+    "smoke": "playwright test tests/smoke.spec.mjs",
+    "bump": "node scripts/bump.mjs",
+    "bump:minor": "node scripts/bump.mjs minor",
+    "bump:major": "node scripts/bump.mjs major",
+    "setup:hooks": "git config core.hooksPath hooks"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0"
