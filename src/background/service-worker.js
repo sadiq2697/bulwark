@@ -113,7 +113,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === MSG.GET_SELECTORS) {
       const s = await getSettings();
       const host = msg.host || "";
-      sendResponse({ selectors: s.pickedSelectors[host] || [], disabled: s.allowlist.includes(host) || !s.enabled });
+      sendResponse({
+        selectors: s.pickedSelectors[host] || [],
+        disabled: s.allowlist.includes(host) || !s.enabled,
+        cosmeticAds: s.rulesets.cosmeticAds,
+        cookies: s.rulesets.cookies,
+      });
     } else if (msg.type === MSG.ADD_SELECTOR) {
       const s = await getSettings();
       const host = msg.host;
