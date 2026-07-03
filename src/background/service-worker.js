@@ -94,6 +94,21 @@ async function applyScriptlets(s) {
   }
 }
 
+async function applyCookieClicker(s) {
+  const ID = "bulwark-cookies";
+  try {
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [ID] });
+    const want = s.cookieAction && s.cookieAction !== "hide";
+    if (want && !existing.length) {
+      await chrome.scripting.registerContentScripts([{
+        id: ID, matches: ["<all_urls>"], js: ["src/content/cookie-clicker.js"], runAt: "document_end",
+      }]);
+    } else if (!want && existing.length) {
+      await chrome.scripting.unregisterContentScripts({ ids: [ID] });
+    }
+  } catch { /* ignore */ }
+}
+
 // Applies settings that are not DNR rules: badge visibility, WebRTC policy, context menu, scriptlets.
 async function applySideSettings() {
   const s = await getSettings();
@@ -104,6 +119,7 @@ async function applySideSettings() {
   } catch { /* privacy API may be unavailable */ }
   await setupContextMenu(s);
   await applyScriptlets(s);
+  await applyCookieClicker(s);
 }
 
 // Rebuilds everything including custom lists and user rules (used on install,

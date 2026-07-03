@@ -4,6 +4,7 @@ import { applyTheme } from "../lib/theme.js";
 import { MSG } from "../lib/messages.js";
 
 const THEME_LABEL = { system: "System", light: "Light", dark: "Dark" };
+const COOKIE_LABEL = { hide: "Hide only", reject: "Reject", accept: "Accept" };
 
 const $ = (id) => document.getElementById(id);
 const times = Array.from({ length: 48 }, (_, i) => {
@@ -149,6 +150,7 @@ async function render() {
   $("invertAllowlist").checked = !!s.invertAllowlist;
   $("userRules").value = s.userRules || "";
   $("themeBtn").textContent = THEME_LABEL[s.ui.theme] || "System";
+  $("cookieActionBtn").textContent = COOKIE_LABEL[s.cookieAction] || "Hide only";
   applyTheme(s.ui.theme);
   $("ver").textContent = "v" + chrome.runtime.getManifest().version;
 }
@@ -208,6 +210,17 @@ function wire() {
   pickTime("start", $("startBtn"), "Start");
   pickTime("end", $("endBtn"), "End");
 
+  $("cookieActionBtn").addEventListener("click", () => {
+    dropdown($("cookieActionBtn"), [
+      { label: "Hide only", value: "hide" },
+      { label: "Reject", value: "reject" },
+      { label: "Accept", value: "accept" },
+    ], async (val) => {
+      await setSettings({ cookieAction: val });
+      $("cookieActionBtn").textContent = COOKIE_LABEL[val];
+      await resync();
+    });
+  });
   $("themeBtn").addEventListener("click", () => {
     dropdown($("themeBtn"), [
       { label: "System", value: "system" },

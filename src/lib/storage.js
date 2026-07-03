@@ -9,6 +9,7 @@ export const DEFAULTS = {
   rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true, social: false, annoyances: false, security: false },
   tracking: { webrtc: false, gpc: false, xclientdata: false, urlparams: false },
   scriptlets: { popups: false, redirect: false },
+  cookieAction: "hide",
   ui: { badge: true, contextMenu: true, theme: "system" },
   invertAllowlist: false,
 };
