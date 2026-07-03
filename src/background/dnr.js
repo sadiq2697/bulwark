@@ -39,7 +39,11 @@ export function trackingParamRule(id) {
     id, priority: 6,
     action: { type: "redirect", redirect: { transform: { queryTransform: { removeParams: TRACKING_PARAMS } } } },
     condition: {
-      regexFilter: "[?&](utm_[a-z_]+|fbclid|gclid|gclsrc|dclid|gbraid|wbraid|msclkid|mc_eid|mc_cid|igshid|yclid|ttclid|twclid|_openstat|oly_anon_id|oly_enc_id|vero_id|wickedid|scid|spm)=",
+      // Kept small (Chrome compiles regexFilter under a ~2KB budget; ~8 short
+      // alternatives is the safe ceiling). This only needs to detect that a common
+      // tracker param is present to trigger the redirect; removeParams above strips
+      // the full list once it fires.
+      regexFilter: "[?&](utm_|fbclid=|gclid=|mc_|igshid=|msclkid=|dclid=|yclid=)",
       resourceTypes: ["main_frame", "sub_frame"],
     },
   };
