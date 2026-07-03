@@ -58,6 +58,8 @@
         <label class="switch"><input type="checkbox" data-ruleset="cosmeticAds"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Dismiss cookie banners</div><div class="fdesc">Fanboy's Cookiemonster</div></div>
         <label class="switch"><input type="checkbox" data-ruleset="cookies"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Cookie banner action</div><div class="fdesc">Hide only, or automatically reject or accept banners.</div></div>
+        <button id="cookieActionBtn" class="pick-time">Hide only</button></div>
       <h2>More lists</h2>
       <div class="field"><div><div class="ftitle">Block social widgets</div><div class="fdesc">Like and share buttons (Fanboy Social)</div></div>
         <label class="switch"><input type="checkbox" data-ruleset="social"><span class="slider"></span></label></div>
@@ -75,6 +77,8 @@
         <label class="switch"><input type="checkbox" data-track="gpc"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Remove X-Client-Data header</div><div class="fdesc">Stops Chrome sending its identifier to Google sites.</div></div>
         <label class="switch"><input type="checkbox" data-track="xclientdata"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Clean tracking parameters from links</div><div class="fdesc">Strips utm_*, fbclid, gclid, and similar from pages you open.</div></div>
+        <label class="switch"><input type="checkbox" data-track="urlparams"><span class="slider"></span></label></div>
     </section>
 
     <section class="sec hidden" data-sec="allowlist">
@@ -130,6 +134,8 @@
         <label class="switch"><input type="checkbox" data-ui="contextMenu"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Block popups and popunders</div><div class="fdesc">Stops windows that open without a click. Rarely, this can block a wanted popup.</div></div>
         <label class="switch"><input type="checkbox" data-scriptlet="popups"><span class="slider"></span></label></div>
+      <div class="field"><div><div class="ftitle">Block automatic redirects</div><div class="fdesc">Stops a page from sending you to another site without a click. Genuine link clicks still work.</div></div>
+        <label class="switch"><input type="checkbox" data-scriptlet="redirect"><span class="slider"></span></label></div>
       <div class="field"><div><div class="ftitle">Invert allowlist</div><div class="fdesc">Block only on the sites in your allowlist, and allow everywhere else.</div></div>
         <label class="switch"><input type="checkbox" id="invertAllowlist"><span class="slider"></span></label></div>
     </section>
