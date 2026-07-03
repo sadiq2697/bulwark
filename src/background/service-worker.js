@@ -141,7 +141,12 @@ async function toggleSite(host) {
   return allowlist.includes(host);
 }
 
-chrome.runtime.onInstalled.addListener(fullSync);
+chrome.runtime.onInstalled.addListener((details) => {
+  fullSync();
+  if (details.reason === "install") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("pages/welcome.html") }).catch(() => {});
+  }
+});
 chrome.runtime.onStartup.addListener(fullSync);
 initCounters();
 
