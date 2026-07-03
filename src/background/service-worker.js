@@ -72,19 +72,41 @@ async function setupContextMenu(s) {
   chrome.contextMenus.create({ id: "bulwark-allow", title: "Toggle blocking on this site", contexts: ["page"] });
 }
 
+const SCRIPTLETS = [
+  { id: "bulwark-popups", flag: "popups", file: "src/content/scriptlets.js" },
+  { id: "bulwark-redirect", flag: "redirect", file: "src/content/scriptlet-redirect.js" },
+];
+
 async function applyScriptlets(s) {
-  const ID = "bulwark-scriptlets";
+  for (const sc of SCRIPTLETS) {
+    try {
+      const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [sc.id] });
+      const want = !!s.scriptlets[sc.flag];
+      if (want && !existing.length) {
+        await chrome.scripting.registerContentScripts([{
+          id: sc.id, matches: ["<all_urls>"], js: [sc.file],
+          runAt: "document_start", world: "MAIN", allFrames: true,
+        }]);
+      } else if (!want && existing.length) {
+        await chrome.scripting.unregisterContentScripts({ ids: [sc.id] });
+      }
+    } catch { /* registerContentScripts world:MAIN needs a recent Chrome */ }
+  }
+}
+
+async function applyCookieClicker(s) {
+  const ID = "bulwark-cookies";
   try {
     const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [ID] });
-    if (s.scriptlets.popups && !existing.length) {
+    const want = s.cookieAction && s.cookieAction !== "hide";
+    if (want && !existing.length) {
       await chrome.scripting.registerContentScripts([{
-        id: ID, matches: ["<all_urls>"], js: ["src/content/scriptlets.js"],
-        runAt: "document_start", world: "MAIN", allFrames: true,
+        id: ID, matches: ["<all_urls>"], js: ["src/content/cookie-clicker.js"], runAt: "document_end",
       }]);
-    } else if (!s.scriptlets.popups && existing.length) {
+    } else if (!want && existing.length) {
       await chrome.scripting.unregisterContentScripts({ ids: [ID] });
     }
-  } catch { /* registerContentScripts world:MAIN needs a recent Chrome */ }
+  } catch { /* ignore */ }
 }
 
 // Applies settings that are not DNR rules: badge visibility, WebRTC policy, context menu, scriptlets.
@@ -97,6 +119,7 @@ async function applySideSettings() {
   } catch { /* privacy API may be unavailable */ }
   await setupContextMenu(s);
   await applyScriptlets(s);
+  await applyCookieClicker(s);
 }
 
 // Rebuilds everything including custom lists and user rules (used on install,

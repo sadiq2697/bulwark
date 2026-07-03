@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { allowlistRules, blocklistRules, trackingRules, RESERVED } from "../src/background/dnr.js";
+import { allowlistRules, blocklistRules, trackingRules, trackingParamRule, RESERVED } from "../src/background/dnr.js";
 
 test("allowlist builds allowAllRequests rules", () => {
   const rules = allowlistRules(["example.com"]);
@@ -22,11 +22,19 @@ test("blocklist redirects main_frame to block page with original url", () => {
 });
 
 test("trackingRules includes only enabled toggles", () => {
-  assert.deepEqual(trackingRules({ gpc: false, xclientdata: false }), []);
-  const gpc = trackingRules({ gpc: true, xclientdata: false });
+  assert.deepEqual(trackingRules({ gpc: false, xclientdata: false, urlparams: false }), []);
+  const gpc = trackingRules({ gpc: true, xclientdata: false, urlparams: false });
   assert.equal(gpc.length, 1);
   assert.equal(gpc[0].action.requestHeaders[0].header, "Sec-GPC");
-  const both = trackingRules({ gpc: true, xclientdata: true });
-  assert.equal(both.length, 2);
-  assert.equal(both[1].action.requestHeaders[0].operation, "remove");
+  const all = trackingRules({ gpc: true, xclientdata: true, urlparams: true });
+  assert.equal(all.length, 3);
+  assert.equal(all[1].action.requestHeaders[0].operation, "remove");
+});
+
+test("trackingParamRule strips params and avoids loops via regexFilter", () => {
+  const r = trackingParamRule(42);
+  const params = r.action.redirect.transform.queryTransform.removeParams;
+  assert.ok(params.includes("utm_source") && params.includes("fbclid") && params.includes("gclid"));
+  assert.ok(r.condition.regexFilter.includes("fbclid"));
+  assert.ok(r.condition.resourceTypes.includes("main_frame"));
 });

@@ -9,6 +9,8 @@
   --card: #f7f8fa;
   --hover: #f2f4f7;
   --chip: #ffffff;
+  --sel-bg: #16202e;
+  --sel-fg: #ffffff;
 }
 :root[data-theme="dark"] {
   --bg: #12151c;
@@ -20,6 +22,8 @@
   --card: #1a1e27;
   --hover: #232833;
   --chip: #1a1e27;
+  --sel-bg: #33404f;
+  --sel-fg: #ffffff;
 }
 * { box-sizing: border-box; }
 body { width: 320px; margin: 0; background: var(--bg); color: var(--ink);
@@ -61,7 +65,7 @@ body { width: 320px; margin: 0; background: var(--bg); color: var(--ink);
 .tabs { display: flex; gap: 6px; padding: 0 14px; }
 .tab { flex: 1; border: 0; background: var(--hover); color: var(--ink2); padding: 8px; border-radius: 8px 8px 0 0;
   cursor: pointer; font-weight: 600; }
-.tab.active { background: var(--ink); color: #fff; }
+.tab.active { background: var(--sel-bg); color: var(--sel-fg); }
 
 .panel { padding: 12px 14px 16px; }
 .panel.hidden { display: none; }
@@ -72,7 +76,7 @@ body { width: 320px; margin: 0; background: var(--bg); color: var(--ink);
 
 .period { display: flex; gap: 6px; margin-bottom: 10px; }
 .pchip { border: 1px solid var(--line); background: var(--chip); color: var(--ink2); border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 12px; }
-.pchip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pchip.active { background: var(--sel-bg); color: var(--sel-fg); border-color: var(--sel-bg); }
 .chartwrap { border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px 6px; }
 #spark { width: 100%; height: 72px; display: block; }
 .chartaxis { display: flex; justify-content: space-between; color: var(--ink2); font-size: 10px; padding: 4px 2px 0; }
