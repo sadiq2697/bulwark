@@ -72,19 +72,26 @@ async function setupContextMenu(s) {
   chrome.contextMenus.create({ id: "bulwark-allow", title: "Toggle blocking on this site", contexts: ["page"] });
 }
 
+const SCRIPTLETS = [
+  { id: "bulwark-popups", flag: "popups", file: "src/content/scriptlets.js" },
+  { id: "bulwark-redirect", flag: "redirect", file: "src/content/scriptlet-redirect.js" },
+];
+
 async function applyScriptlets(s) {
-  const ID = "bulwark-scriptlets";
-  try {
-    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [ID] });
-    if (s.scriptlets.popups && !existing.length) {
-      await chrome.scripting.registerContentScripts([{
-        id: ID, matches: ["<all_urls>"], js: ["src/content/scriptlets.js"],
-        runAt: "document_start", world: "MAIN", allFrames: true,
-      }]);
-    } else if (!s.scriptlets.popups && existing.length) {
-      await chrome.scripting.unregisterContentScripts({ ids: [ID] });
-    }
-  } catch { /* registerContentScripts world:MAIN needs a recent Chrome */ }
+  for (const sc of SCRIPTLETS) {
+    try {
+      const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [sc.id] });
+      const want = !!s.scriptlets[sc.flag];
+      if (want && !existing.length) {
+        await chrome.scripting.registerContentScripts([{
+          id: sc.id, matches: ["<all_urls>"], js: [sc.file],
+          runAt: "document_start", world: "MAIN", allFrames: true,
+        }]);
+      } else if (!want && existing.length) {
+        await chrome.scripting.unregisterContentScripts({ ids: [sc.id] });
+      }
+    } catch { /* registerContentScripts world:MAIN needs a recent Chrome */ }
+  }
 }
 
 // Applies settings that are not DNR rules: badge visibility, WebRTC policy, context menu, scriptlets.
