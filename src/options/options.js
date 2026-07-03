@@ -42,6 +42,41 @@ function showSection(sec) {
   if (sec === "rulelimits") renderLimits();
   if (sec === "filters") renderListInfo();
   if (sec === "dashboard") renderDashboard();
+  if (sec === "custom") renderPicked();
+}
+
+async function renderPicked() {
+  const s = await getSettings();
+  const ul = $("pickedList");
+  ul.replaceChildren();
+  const hosts = Object.keys(s.pickedSelectors).filter((h) => (s.pickedSelectors[h] || []).length).sort();
+  if (!hosts.length) {
+    const li = document.createElement("li");
+    li.textContent = "No hidden elements yet.";
+    ul.appendChild(li);
+    return;
+  }
+  for (const host of hosts) {
+    for (const sel of s.pickedSelectors[host]) {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      const h = document.createElement("strong"); h.textContent = host + " ";
+      const code = document.createElement("code"); code.textContent = sel;
+      span.append(h, code);
+      const btn = document.createElement("button"); btn.textContent = "Remove";
+      btn.addEventListener("click", async () => {
+        const cur = await getSettings();
+        const arr = (cur.pickedSelectors[host] || []).filter((x) => x !== sel);
+        const picked = { ...cur.pickedSelectors };
+        if (arr.length) picked[host] = arr; else delete picked[host];
+        await setSettings({ pickedSelectors: picked });
+        await resync();
+        renderPicked();
+      });
+      li.append(span, btn);
+      ul.appendChild(li);
+    }
+  }
 }
 
 function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
