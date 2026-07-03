@@ -8,6 +8,7 @@ import { MSG } from "../lib/messages.js";
 const BLOCK_PAGE = chrome.runtime.getURL("pages/blocked.html");
 const MAX_CUSTOM = 20000;
 const NETWORK_RULESETS = ["ads", "privacy", "social", "annoyances", "security"];
+let lastPick = null; // { host, selector } for undo
 
 function hostOf(url) { try { return new URL(url).hostname; } catch { return ""; } }
 
@@ -141,7 +142,12 @@ async function toggleSite(host) {
   return allowlist.includes(host);
 }
 
-chrome.runtime.onInstalled.addListener(fullSync);
+chrome.runtime.onInstalled.addListener((details) => {
+  fullSync();
+  if (details.reason === "install") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("pages/welcome.html") }).catch(() => {});
+  }
+});
 chrome.runtime.onStartup.addListener(fullSync);
 initCounters();
 
@@ -257,7 +263,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const list = new Set(s.pickedSelectors[host] || []);
       list.add(msg.selector);
       await setSettings({ pickedSelectors: { ...s.pickedSelectors, [host]: [...list] } });
+      lastPick = { host, selector: msg.selector };
       sendResponse({ ok: true });
+    } else if (msg.type === MSG.UNDO_LAST_HIDE) {
+      if (lastPick) {
+        const s = await getSettings();
+        const arr = (s.pickedSelectors[lastPick.host] || []).filter((x) => x !== lastPick.selector);
+        await setSettings({ pickedSelectors: { ...s.pickedSelectors, [lastPick.host]: arr } });
+        const host = lastPick.host;
+        lastPick = null;
+        sendResponse({ ok: true, host });
+      } else {
+        sendResponse({ ok: false });
+      }
     }
   })();
   return true; // keep the message channel open for the async response
