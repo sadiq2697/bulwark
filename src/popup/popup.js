@@ -125,6 +125,11 @@ async function init() {
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["src/content/picker.js"] });
     window.close();
   });
+  $("undoHide").addEventListener("click", async () => {
+    const res = await chrome.runtime.sendMessage({ type: MSG.UNDO_LAST_HIDE });
+    if (res && res.ok) chrome.tabs.reload(tab.id);
+    window.close();
+  });
   const openOpts = () => chrome.runtime.openOptionsPage();
   $("openOptions").addEventListener("click", openOpts);
   $("settings2").addEventListener("click", openOpts);

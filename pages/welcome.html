@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Welcome to Bulwark</title>
+<style>
+  :root { --bg:#f5f6f8; --surface:#fff; --ink:#16202e; --ink2:#5c6773; --line:#e6e9ee; --active:#1f9d63; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.6 -apple-system, system-ui, "Segoe UI", sans-serif; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 48px 24px; }
+  .hero { text-align:center; }
+  .hero img { width:88px; height:88px; }
+  h1 { font-size:30px; margin:14px 0 6px; }
+  .sub { color:var(--ink2); font-size:17px; margin:0 0 28px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin:12px 0; }
+  .card h2 { font-size:16px; margin:0 0 6px; }
+  .card p { margin:0; color:var(--ink2); }
+  .step { display:flex; gap:14px; align-items:flex-start; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--active); color:#fff; display:grid; place-items:center; font-weight:700; font-size:14px; }
+  kbd { background:#eef0f3; border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size:13px; }
+  .cta { display:flex; gap:12px; justify-content:center; margin-top:28px; }
+  .btn { border:0; border-radius:10px; padding:12px 20px; font-size:15px; cursor:pointer; text-decoration:none; display:inline-block; }
+  .btn.primary { background:var(--active); color:#fff; }
+  .btn.ghost { background:#eef0f3; color:var(--ink); }
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <img src="../icons/icon128.png" alt="">
+      <h1>Bulwark is protecting you</h1>
+      <p class="sub">Ads, trackers, and distracting sites are being blocked. No account, no telemetry.</p>
+    </div>
+
+    <div class="card"><div class="step"><div class="num">1</div><div><h2>Pin the bull to your toolbar</h2><p>Click the puzzle icon in Chrome's toolbar, then pin Bulwark so it is one click away.</p></div></div></div>
+    <div class="card"><div class="step"><div class="num">2</div><div><h2>Toggle protection anytime</h2><p>Click the icon to pause blocking on a site, see what got blocked, or hide an element. Or press <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> on any page.</p></div></div></div>
+    <div class="card"><div class="step"><div class="num">3</div><div><h2>Make it yours</h2><p>Open Settings to block distracting sites on a schedule, add custom filter lists, turn on tracking protection, and pick a theme.</p></div></div></div>
+
+    <div class="cta">
+      <button id="openOptions" class="btn primary">Open settings</button>
+      <a class="btn ghost" href="https://github.com/sadiq2697/bulwark" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+  <script src="welcome.js"></script>
+</body>
+</html>
