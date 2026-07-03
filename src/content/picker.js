@@ -1,5 +1,6 @@
 // Injected on demand via chrome.scripting.executeScript (classic script).
-// Reuses the tested generateSelector via dynamic import of the web-accessible module.
+// Hover to target, click or Enter to hide. Arrow Up widens the selection to the
+// parent, Arrow Down narrows it to the first child. Esc cancels.
 (() => {
   if (window.__bulwarkPicker) return;
   window.__bulwarkPicker = true;
@@ -17,15 +18,15 @@
   let generateSelector = (el) => (el.id ? `#${el.id}` : (el.tagName || "div").toLowerCase());
   import(chrome.runtime.getURL("src/content/selector.js"))
     .then((m) => { if (m && m.generateSelector) generateSelector = m.generateSelector; })
-    .catch(() => { /* fall back to the inline generator above */ });
+    .catch(() => {});
 
-  function onMove(e) {
-    const el = document.elementFromPoint(e.clientX, e.clientY);
+  function highlight(el) {
     if (!el || el === box) return;
     current = el;
     const r = el.getBoundingClientRect();
     Object.assign(box.style, { top: `${r.top}px`, left: `${r.left}px`, width: `${r.width}px`, height: `${r.height}px` });
   }
+  function onMove(e) { highlight(document.elementFromPoint(e.clientX, e.clientY)); }
   function cleanup() {
     document.removeEventListener("mousemove", onMove, true);
     document.removeEventListener("click", onClick, true);
@@ -33,15 +34,27 @@
     box.remove();
     window.__bulwarkPicker = false;
   }
-  async function onClick(e) {
-    e.preventDefault(); e.stopPropagation();
+  async function confirmPick() {
     if (!current) return;
     const selector = generateSelector(current);
     try { current.style.setProperty("display", "none", "important"); } catch {}
     await chrome.runtime.sendMessage({ type: ADD_SELECTOR, host: location.hostname, selector });
     cleanup();
   }
-  function onKey(e) { if (e.key === "Escape") cleanup(); }
+  async function onClick(e) { e.preventDefault(); e.stopPropagation(); await confirmPick(); }
+  function onKey(e) {
+    if (e.key === "Escape") { e.preventDefault(); cleanup(); }
+    else if (e.key === "Enter") { e.preventDefault(); confirmPick(); }
+    else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const p = current && current.parentElement;
+      if (p && p !== document.documentElement) highlight(p);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const c = current && current.firstElementChild;
+      if (c) highlight(c);
+    }
+  }
 
   document.addEventListener("mousemove", onMove, true);
   document.addEventListener("click", onClick, true);

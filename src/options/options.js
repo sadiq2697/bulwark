@@ -247,14 +247,15 @@ function wire() {
   });
   $("exportSettings").addEventListener("click", async () => {
     const s = await getSettings();
-    download("bulwark-settings.json", JSON.stringify(s, null, 2));
+    download("bulwark-profile.json", JSON.stringify({ __bulwark: 1, settings: s }, null, 2));
   });
   $("importSettings").addEventListener("click", async () => {
     const text = await pickFile($("importFile"));
     if (!text) return;
     try {
       const data = JSON.parse(text);
-      if (data && typeof data === "object") { await setSettings(data); await resync(); render(); }
+      const settings = data && data.__bulwark ? data.settings : data; // accept profile or raw settings
+      if (settings && typeof settings === "object") { await setSettings(settings); await resync(); render(); }
     } catch { /* invalid file, ignore */ }
   });
   $("allowExport").addEventListener("click", async () => {
