@@ -123,13 +123,25 @@ async function applySideSettings() {
   await applyCookieClicker(s);
 }
 
-// Rebuilds everything including custom lists and user rules (used on install,
-// options edits, and the list alarm).
-async function fullSync() {
+// Updates the DNR rules only (the response-critical part). Fast and reliable.
+async function syncRules() {
   const [custom, user] = await Promise.all([buildCustomRules(), buildUserRules()]);
   await syncDynamicRules(custom.concat(user));
+}
+
+// Rebuilds everything including custom lists, user rules, and side settings.
+// Used on install, startup, and the alarm, where nothing waits on a response.
+async function fullSync() {
+  await syncRules();
   await applySideSettings();
   await setLocal("listsUpdatedAt", Date.now());
+}
+
+// For message-driven updates: sync rules, then run side settings (which register
+// content scripts) in the background so they can never hang the caller.
+async function syncForMessage() {
+  await syncRules();
+  applySideSettings().catch(() => {});
 }
 
 async function toggleSite(host) {
@@ -138,7 +150,7 @@ async function toggleSite(host) {
     ? s.allowlist.filter((h) => h !== host)
     : [...s.allowlist, host];
   await setSettings({ allowlist });
-  await fullSync();
+  syncForMessage().catch(() => {}); // apply in background so callers never block
   return allowlist.includes(host);
 }
 
@@ -208,12 +220,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const host = msg.host || "";
       sendResponse({ enabled: s.enabled, siteAllowed: s.allowlist.includes(host), host, theme: s.ui.theme });
     } else if (msg.type === MSG.SETTINGS_CHANGED) {
-      await fullSync();
       sendResponse({ ok: true });
+      syncForMessage().catch(() => {});
     } else if (msg.type === MSG.SET_ENABLED) {
       await setSettings({ enabled: msg.enabled });
-      await fullSync();
       sendResponse({ ok: true });
+      syncForMessage().catch(() => {});
     } else if (msg.type === MSG.TOGGLE_SITE) {
       const allowed = await toggleSite(msg.host);
       sendResponse({ siteAllowed: allowed });
@@ -227,8 +239,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === MSG.GET_LOG) {
       sendResponse({ entries: getLog() });
     } else if (msg.type === MSG.UPDATE_LISTS) {
-      await fullSync();
+      await syncRules();
+      await setLocal("listsUpdatedAt", Date.now());
       sendResponse({ updatedAt: await getLocal("listsUpdatedAt", 0) });
+      applySideSettings().catch(() => {});
     } else if (msg.type === MSG.GET_LIST_INFO) {
       const s = await getSettings();
       sendResponse({ updatedAt: await getLocal("listsUpdatedAt", 0), customCount: s.customListUrls.length });

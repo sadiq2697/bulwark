@@ -13,7 +13,14 @@ const times = Array.from({ length: 48 }, (_, i) => {
   return `${h}:${m}`;
 });
 
-async function resync() { try { await chrome.runtime.sendMessage({ type: MSG.SETTINGS_CHANGED }); } catch {} }
+async function resync() {
+  try {
+    await Promise.race([
+      chrome.runtime.sendMessage({ type: MSG.SETTINGS_CHANGED }),
+      new Promise((r) => setTimeout(r, 3000)),
+    ]);
+  } catch { /* settings already saved; never block the UI on the ack */ }
+}
 
 function download(name, text, type = "application/json") {
   const url = URL.createObjectURL(new Blob([text], { type }));
