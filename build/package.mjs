@@ -5,7 +5,7 @@ import { mkdirSync, rmSync, existsSync, readFileSync } from "node:fs";
 
 const version = JSON.parse(readFileSync("manifest.json", "utf8")).version;
 const OUT = `dist/bulwark-${version}.zip`;
-const INCLUDE = ["manifest.json", "src", "rules", "pages", "icons"];
+const INCLUDE = ["manifest.json", "src", "rules", "pages", "icons", "_locales"];
 
 for (const p of INCLUDE) {
   if (!existsSync(p)) { console.error(`Missing ${p}. Run "npm run build:rules" first.`); process.exit(1); }

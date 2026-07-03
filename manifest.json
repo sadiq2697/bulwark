@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Bulwark",
+  "name": "__MSG_extName__",
   "version": "0.1.10",
-  "description": "Block ads, trackers, and distracting sites.",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "storage", "scripting", "tabs", "alarms", "webNavigation", "contextMenus", "privacy"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background/service-worker.js", "type": "module" },
