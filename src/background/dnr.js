@@ -24,12 +24,34 @@ export function removeXClientDataRule(id) {
   };
 }
 
+const TRACKING_PARAMS = [
+  "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id",
+  "utm_name", "utm_social", "utm_reader", "gclid", "gclsrc", "dclid", "gbraid", "wbraid",
+  "fbclid", "msclkid", "mc_eid", "mc_cid", "igshid", "yclid", "ttclid", "twclid",
+  "_openstat", "oly_anon_id", "oly_enc_id", "vero_id", "wickedid", "scid", "spm",
+];
+
+// Strips known tracking parameters from navigations. The regexFilter requires a
+// tracking param to be present, so after stripping there is nothing to match and
+// no redirect loop occurs.
+export function trackingParamRule(id) {
+  return {
+    id, priority: 6,
+    action: { type: "redirect", redirect: { transform: { queryTransform: { removeParams: TRACKING_PARAMS } } } },
+    condition: {
+      regexFilter: "[?&](utm_[a-z_]+|fbclid|gclid|gclsrc|dclid|gbraid|wbraid|msclkid|mc_eid|mc_cid|igshid|yclid|ttclid|twclid|_openstat|oly_anon_id|oly_enc_id|vero_id|wickedid|scid|spm)=",
+      resourceTypes: ["main_frame", "sub_frame"],
+    },
+  };
+}
+
 // Builds the tracking-protection dynamic rules for the enabled toggles.
 export function trackingRules(tracking) {
   const out = [];
   let id = RESERVED.TRACK_START;
   if (tracking.gpc) out.push(gpcHeaderRule(id++));
   if (tracking.xclientdata) out.push(removeXClientDataRule(id++));
+  if (tracking.urlparams) out.push(trackingParamRule(id++));
   return out;
 }
 

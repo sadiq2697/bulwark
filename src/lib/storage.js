@@ -7,7 +7,7 @@ export const DEFAULTS = {
   userRules: "",
   pickedSelectors: {},
   rulesets: { ads: true, privacy: true, cosmeticAds: true, cookies: true, social: false, annoyances: false, security: false },
-  tracking: { webrtc: false, gpc: false, xclientdata: false },
+  tracking: { webrtc: false, gpc: false, xclientdata: false, urlparams: false },
   scriptlets: { popups: false },
   ui: { badge: true, contextMenu: true, theme: "system" },
   invertAllowlist: false,
