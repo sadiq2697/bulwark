@@ -1,0 +1,30 @@
+{
+  "extName": { "message": "Bulwark", "description": "Extension name" },
+  "extDescription": { "message": "Block ads, trackers, and distracting sites.", "description": "Extension description" },
+
+  "protectionOn": { "message": "Protection on" },
+  "pausedSite": { "message": "Paused on this site" },
+  "pausedEverywhere": { "message": "Paused everywhere" },
+  "blockedHere": { "message": "blocked here" },
+  "blockedTotal": { "message": "blocked total" },
+  "actions": { "message": "Actions" },
+  "statistics": { "message": "Statistics" },
+  "hideElement": { "message": "Hide an element on this page" },
+  "undoLastHide": { "message": "Undo last hide" },
+  "openLog": { "message": "Open filtering log" },
+  "reportIssue": { "message": "Report an issue" },
+  "openSettings": { "message": "Open settings" },
+
+  "navGeneral": { "message": "General" },
+  "navDashboard": { "message": "Dashboard" },
+  "navFilters": { "message": "Filters" },
+  "navTracking": { "message": "Tracking protection" },
+  "navAllowlist": { "message": "Allowlist" },
+  "navBlocked": { "message": "Blocked sites" },
+  "navSchedule": { "message": "Schedule" },
+  "navCustom": { "message": "Custom lists" },
+  "navUserRules": { "message": "User rules" },
+  "navRuleLimits": { "message": "Rule limits" },
+  "navAdditional": { "message": "Additional settings" },
+  "navAbout": { "message": "About" }
+}

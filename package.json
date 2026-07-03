@@ -1,12 +1,13 @@
 {
   "name": "bulwark",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test",
     "build:rules": "node build/generate-rules.mjs",
     "smoke": "playwright test tests/smoke.spec.mjs",
+    "package": "node build/package.mjs",
     "bump": "node scripts/bump.mjs",
     "bump:minor": "node scripts/bump.mjs minor",
     "bump:major": "node scripts/bump.mjs major",
